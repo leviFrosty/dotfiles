@@ -1,4 +1,6 @@
-# Get dotfiles setup on another machine:
+# Dotfiles
+
+## Get dotfiles setup on another machine:
 
 ```shell
 alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
@@ -24,14 +26,14 @@ mv ~/.zshrc ~/.zshrc_backup
 dotfiles checkout
 ```
 
-# Add new files to dotfiles
+## Add new files to dotfiles
 
 ```shell
 dotfiles add ~/.config/aerospace/**
 dotfiles push
 ```
 
-# Syncing from other machine
+## Syncing from other machine
 
 ```shell
 dotfiles pull
