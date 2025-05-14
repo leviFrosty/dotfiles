@@ -2,11 +2,14 @@
 
 ## Get dotfiles setup on another machine:
 
+[Homebrew](https://brew.sh/) must be installed already.
+
 ```shell
 alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 git clone --bare git@github.com:leviFrosty/dotfiles.git $HOME/.dotfiles
 dotfiles config --local status.showUntrackedFiles no
 dotfiles checkout
+brew bundle --file=~/Brewfile
 source ~/.zshrc
 ```
 

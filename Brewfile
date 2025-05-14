@@ -2,10 +2,6 @@ tap "felixkratz/formulae"
 tap "homebrew/services"
 tap "nikitabobko/tap"
 tap "stripe/stripe-cli"
-# CLI tool to build, test, debug, and deploy Serverless applications using AWS SAM
-brew "aws-sam-cli"
-# Official Amazon AWS command-line interface
-brew "awscli"
 # Tool to obtain certs from Let's Encrypt and autoenable HTTPS
 brew "certbot"
 # Dependency manager for Cocoa projects
