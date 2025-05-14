@@ -191,6 +191,7 @@
   "window.commandCenter": false,
   "zenMode.fullScreen": false,
   "zenMode.hideLineNumbers": false,
+  "terminal.integrated.defaultProfile.osx": "zsh",
   "terminal.integrated.profiles.windows": {
     "PowerShell": {
       "path": "pwsh",
