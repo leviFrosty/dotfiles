@@ -39,8 +39,22 @@ dotfiles push
 dotfiles pull
 ```
 
-## Add all brew formulae / casks / etc. into Brewfile
+## Dump brew bundle into a file
 
 ```shell
 brew bundle dump --describe --file=~/Brewfile --force
+```
+
+## Install brew bundle
+
+```shell
+brew bundle --file=~/Brewfile
+```
+
+## Install Sketchybar from FelixKratz
+
+[Source](https://github.com/FelixKratz/dotfiles/tree/master)
+
+```shell
+curl -L https://raw.githubusercontent.com/FelixKratz/dotfiles/master/install_sketchybar.sh | sh
 ```

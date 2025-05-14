@@ -18,14 +18,22 @@ brew "flyctl"
 brew "gh"
 # Open source programming language to build simple/reliable/efficient software
 brew "go"
+# Powerful, lightweight programming language
+brew "lua"
 # Atlas CLI enables you to manage your MongoDB Atlas
 brew "mongodb-atlas-cli"
+# Fast, highly customisable system info script
+brew "neofetch"
 # Ambitious Vim-fork focused on extensibility and agility
 brew "neovim"
+# Retrieves currently playing media, and simulates media actions
+brew "nowplaying-cli"
 # Development kit for the Java programming language
 brew "openjdk"
 # Search tool like grep and The Silver Searcher
 brew "ripgrep"
+# Change macOS audio source from the command-line
+brew "switchaudio-osx"
 # Watch files and take action when they change
 brew "watchman"
 # Fish-like fast/unobtrusive autosuggestions for zsh
@@ -34,6 +42,8 @@ brew "zsh-autosuggestions"
 brew "zsh-fast-syntax-highlighting"
 # A window border system for macOS
 brew "felixkratz/formulae/borders"
+# Custom macOS statusbar with shell plugin, interaction and graph support
+brew "felixkratz/formulae/sketchybar"
 # Stripe CLI utility
 brew "stripe/stripe-cli/stripe"
 # Password manager that keeps all passwords secure behind one password
@@ -46,10 +56,15 @@ cask "android-studio"
 cask "discord"
 # App to build and share containerised applications and microservices
 cask "docker"
+cask "font-hack-nerd-font"
+cask "font-sf-mono"
+cask "font-sf-pro"
 # Terminal emulator that uses platform-native UI and GPU acceleration
 cask "ghostty"
 # Web browser
 cask "google-chrome"
+# Tool that provides consistent, highly configurable symbols for apps
+cask "sf-symbols"
 # Music streaming service
 cask "spotify"
 # Video game digital distribution service
