@@ -1,0 +1,210 @@
+{
+  /**
+   * VIM Keymaps
+   */
+  // "vim.leader": "<space>", Not set due to conflict with keybinds.json chords. Using default leader "\" instead.
+  "vim.normalModeKeyBindingsNonRecursive": [
+    {
+      "before": ["<Esc>"],
+      "when": ["editorFocus"],
+      "commands": [":nohl"], // Clears highlight of current search
+      "silent": true
+    }
+  ],
+  "vim.handleKeys": {
+    "<C-a>": false,
+    "<C-f>": false
+  },
+
+  /**
+   * VIM Options
+   */
+  "vim.incsearch": true,
+  "vim.searchHighlightColor": "#f6ff0080",
+  "vim.searchHighlightTextColor": "#fff",
+  "vim.useSystemClipboard": true,
+  "vim.useCtrlKeys": true,
+  "vim.hlsearch": true,
+  "vim.highlightedyank.enable": true,
+  "vim.smartRelativeLine": true,
+  "vim.surround": true,
+  "vim.easymotion": true, // Search with "\\f"
+
+  /**
+
+  /*
+   * Language Options
+   */
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "javascript.preferGoToSourceDefinition": true,
+  "typescript.preferGoToSourceDefinition": true,
+  "debug.javascript.autoAttachFilter": "onlyWithFlag",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "gopls": { "ui.semanticTokens": true },
+  "[go.mod]": {
+    "editor.defaultFormatter": "golang.go"
+  },
+  "[go]": {
+    "editor.defaultFormatter": "golang.go"
+  },
+  "go.toolsManagement.autoUpdate": true,
+
+  /**
+   * Extensions Options
+   */
+
+  "extensions.experimental.affinity": {
+    "vscodevim.vim": 1 // GREATLY improves vim performance
+  },
+  "gitlens.showWhatsNewAfterUpgrades": false,
+  "gitlens.defaultGravatarsStyle": "retro",
+  "gitlens.plusFeatures.enabled": false,
+  "gitlens.codeLens.enabled": false,
+  "cSpell.spellCheckDelayMs": 350,
+  "cSpell.textDecorationColor": "lightblue",
+  "cSpell.overviewRulerColor": "",
+  "cSpell.suggestionsTimeout": 500,
+  "tailwindCSS.experimental.classRegex": [
+    // Used in Shadcn UI
+    // Adds support for tailwindcss class intellisense within CVA and CX from [Class Variance Authority](https://cva.style/)
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+  ],
+  "auto-close-tag.activationOnLanguage": [
+    "html",
+    "javascriptreact",
+    "typescriptreact"
+  ],
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "supermaven.enable": {
+    "go": false,
+    "*": false
+  },
+  "oneDarkPro.bold": true,
+  "oneDarkPro.vivid": true,
+
+  /**
+   * Aesthetics
+   */
+  "breadcrumbs.symbolPath": "off", // Disables language symbols in breadcrumbs.
+  "breadcrumbs.icons": false,
+  "window.systemColorTheme": "dark",
+  "window.title": " ",
+  "workbench.activityBar.location": "top", // More horizontal screen space
+  "workbench.tips.enabled": false,
+  "workbench.iconTheme": "material-icon-theme",
+  "editor.scrollbar.verticalScrollbarSize": 12,
+  "editor.cursorBlinking": "solid", // Annoying
+  "editor.fontSize": 23, // Just right :p
+  "editor.lineHeight": 31, // Slightly tigher than default (30)
+  "editor.fontFamily": "Jetbrains Mono, Fira Code, Courier New, monospace",
+  "editor.fontLigatures": true, // Fancy === and !== type symbols
+  "editor.minimap.enabled": false,
+  "workbench.colorTheme": "One Dark Pro", // <3
+  "terminal.integrated.fontSize": 16,
+  "terminal.integrated.fontFamily": "Jetbrains Mono, Fira Code",
+  "workbench.colorCustomizations": {
+    // ruler colors START
+    "editorOverviewRuler.border": "#0000",
+    "editorOverviewRuler.findMatchForeground": "#f6ff0065",
+    "editorOverviewRuler.rangeHighlightForeground": "#0000",
+    "editorOverviewRuler.selectionHighlightForeground": "#0000",
+    "editorOverviewRuler.wordHighlightForeground": "#0000",
+    "editorOverviewRuler.wordHighlightStrongForeground": "#0000",
+    "editorOverviewRuler.modifiedForeground": "#16ed4f30",
+    "editorOverviewRuler.addedForeground": "#16ed4f30",
+    "editorOverviewRuler.deletedForeground": "#0000",
+    "editorOverviewRuler.infoForeground": "#0000",
+    "editorOverviewRuler.bracketMatchForeground": "#0000"
+    // ruler colors END
+  },
+  "editor.tokenColorCustomizations": {
+    "textMateRules": [
+      {
+        // For 'One Dark Pro' theme. Remove this rule if you want to delete italics.
+        "name": "italic font",
+        "scope": [
+          "comment",
+          "keyword",
+          "storage",
+          "keyword.control",
+          "keyword.control.from",
+          "keyword.control.flow",
+          "keyword.operator.new",
+          "keyword.control.import",
+          "keyword.control.export",
+          "keyword.control.default",
+          "keyword.control.trycatch",
+          "keyword.control.conditional",
+          "storage.type",
+          "storage.type.class",
+          "storage.modifier.tsx",
+          "storage.type.function",
+          "storage.modifier.async",
+          "variable.language",
+          "variable.language.this",
+          "variable.language.super",
+          "meta.class",
+          "meta.var.expr",
+          "constant.language.null",
+          "support.type.primitive",
+          "entity.name.method.js",
+          "entity.other.attribute-name",
+          "punctuation.definition.comment",
+          "text.html.basic entity.other.attribute-name",
+          "tag.decorator.js entity.name.tag.js",
+          "tag.decorator.js punctuation.definition.tag.js",
+          "source.js constant.other.object.key.js string.unquoted.label.js"
+        ],
+        "settings": {
+          "fontStyle": "italic"
+        }
+      }
+    ]
+  },
+  "zenMode.hideStatusBar": false, // We want the status bar for VIM commands / search / etc
+  "window.density.editorTabHeight": "compact", // Default tabs are a bit too vertically thick. Gives more vertical space
+  "workbench.editor.showTabs": "multiple", // If you find yourself constantly flipping between tabs, distracted, you can disable them here
+
+  /**
+   * General Options
+   */
+  "editor.linkedEditing": true,
+  "files.autoSave": "onWindowChange", // Auto-saves if window gets de-focused
+  "editor.formatOnSave": true,
+  "terminal.integrated.commandsToSkipShell": ["workbench.action.closePanel"],
+  "terminal.integrated.defaultProfile.windows": "Windows PowerShell",
+  "editor.accessibilitySupport": "off",
+  "git.openRepositoryInParentFolders": "always",
+  "extensions.ignoreRecommendations": true,
+  "settingsSync.keybindingsPerPlatform": false,
+  "telemetry.telemetryLevel": "off",
+  "security.workspace.trust.banner": "never",
+  "security.workspace.trust.untrustedFiles": "open",
+  "security.workspace.trust.startupPrompt": "never",
+  "security.workspace.trust.enabled": false,
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  "git.autoStash": true,
+  "git.autofetch": true,
+  "workbench.layoutControl.enabled": false,
+  "window.commandCenter": false,
+  "zenMode.fullScreen": false,
+  "zenMode.hideLineNumbers": false,
+  "terminal.integrated.profiles.windows": {
+    "PowerShell": {
+      "path": "pwsh",
+      "icon": "terminal-powershell"
+    }
+  },
+  "terminal.integrated.env.windows": {
+    "PATH": "${env:PATH};${workspaceRoot}\\node_modules\\.bin;${env:PNPM_HOME}"
+  },
+  "explorer.confirmDragAndDrop": false,
+  "workbench.startupEditor": "welcomePageInEmptyWorkbench",
+  "explorer.confirmDelete": false,
+  "explorer.confirmPasteNative": false,
+  "terminal.integrated.scrollback": 5000,
+  "terminal.integrated.enableMultiLinePasteWarning": "never",
+  "workbench.editor.empty.hint": "hidden"
+}
