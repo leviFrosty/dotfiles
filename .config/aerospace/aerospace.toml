@@ -164,9 +164,9 @@ automatically-unhide-macos-hidden-apps = false
     down = 'volume down'
     up = 'volume up'
     shift-down = ['volume set 0', 'mode main']
-    l = "exec-and-forget osascript -e 'tell application \"Spotiy\" to previous track'"
+    h = "exec-and-forget osascript -e 'tell application \"Spotify\" to previous track'"
     k = "exec-and-forget osascript -e 'tell application \"Spotify\" to playpause'"
-    h = "exec-and-forget osascript -e 'tell application \"Spotify\" to next track'"
+    l = "exec-and-forget osascript -e 'tell application \"Spotify\" to next track'"
 
 # Terminals
 [[on-window-detected]]
