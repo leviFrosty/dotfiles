@@ -1,4 +1,6 @@
+tap "felixkratz/formulae"
 tap "homebrew/services"
+tap "nikitabobko/tap"
 tap "stripe/stripe-cli"
 # CLI tool to build, test, debug, and deploy Serverless applications using AWS SAM
 brew "aws-sam-cli"
@@ -26,10 +28,18 @@ brew "openjdk"
 brew "ripgrep"
 # Watch files and take action when they change
 brew "watchman"
+# Fish-like fast/unobtrusive autosuggestions for zsh
+brew "zsh-autosuggestions"
+# Feature-rich syntax highlighting for Zsh
+brew "zsh-fast-syntax-highlighting"
+# A window border system for macOS
+brew "felixkratz/formulae/borders"
 # Stripe CLI utility
 brew "stripe/stripe-cli/stripe"
 # Password manager that keeps all passwords secure behind one password
 cask "1password"
+# AeroSpace is an i3-like tiling window manager for macOS
+cask "aerospace"
 # Tools for building Android applications
 cask "android-studio"
 # Voice and text chat software

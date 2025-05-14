@@ -1,3 +1,7 @@
+# Source zsh plugins
+source $(brew --prefix)/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
+source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+
 # Add deno completions to search path
 if [[ ":$FPATH:" != *":/Users/levi/.zsh/completions:"* ]]; then export FPATH="/Users/levi/.zsh/completions:$FPATH"; fi
 export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
@@ -25,3 +29,17 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 alias ls='ls -a --color'
 alias src='source ~/.zshrc'
 alias dotfiles="/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
+
+# Color Scheme
+export BLACK=0xff181819
+export WHITE=0xffe2e2e3
+export RED=0xfffc5d7c
+export GREEN=0xff9ed072
+export BLUE=0xff76cce0
+export YELLOW=0xffe7c664
+export ORANGE=0xfff39660
+export MAGENTA=0xffb39df3
+export GREY=0xff7f8490
+export TRANSPARENT=0x00000000
+export BG0=0xff2c2e34
+export BG1=0xff363944

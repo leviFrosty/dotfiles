@@ -38,3 +38,9 @@ dotfiles push
 ```shell
 dotfiles pull
 ```
+
+## Add all brew formulae / casks / etc. into Brewfile
+
+```shell
+brew bundle dump --describe --file=~/Brewfile --force
+```
