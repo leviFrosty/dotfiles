@@ -299,6 +299,11 @@
     "command": "editor.action.showHover",
     "when": "vim.mode == 'Normal' && editorTextFocus"
   },
+  {
+    "key": "escape",
+    "command": "extension.vim_escape",
+    "when": "editorTextFocus && !inDebugRepl && suggestWidgetVisible"
+  },
   // Coding END
 
   // HARPOON (vscode-harpoon) START

@@ -7,6 +7,7 @@ alias ls='ls -a --color'
 alias src='source ~/.zshrc'
 alias dotfiles="/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
 alias vim="nvim"
+alias code="cursor"
 
 # Color Scheme
 export BLACK=0xff181819
