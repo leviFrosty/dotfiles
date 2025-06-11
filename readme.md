@@ -1,8 +1,13 @@
 # Dotfiles
 
+## Prerequisites
+
+- [Homebrew](https://brew.sh/)
+- [JetbrainsMono Nerd Font](https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/JetBrainsMono.zip)
+
+
 ## Get dotfiles setup on another machine:
 
-[Homebrew](https://brew.sh/) must be installed already.
 
 ```shell
 alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
