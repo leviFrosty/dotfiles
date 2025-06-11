@@ -1,52 +1,65 @@
-# -- START PERSONAL CUSTOMIZATIONS -- 
-# Source zsh plugins
-source $(brew --prefix)/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
-source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+# Set the directory we want to store zinit and plugins
+ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 
+if [[ -f "/opt/homebrew/bin/brew" ]] then
+  eval "$(/opt/homebrew/bin/brew shellenv)" # Makes any brew installed apps available in home path.
+fi
+
+# Download Zinit, if it's not there yet
+if [ ! -d "$ZINIT_HOME" ]; then
+   mkdir -p "$(dirname $ZINIT_HOME)"
+   git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
+fi
+
+# Source/Load zinit
+source "${ZINIT_HOME}/zinit.zsh"
+
+# Plugins
+zinit light zsh-users/zsh-syntax-highlighting
+zinit light zsh-users/zsh-completions
+zinit light zsh-users/zsh-autosuggestions
+zinit light Aloxaf/fzf-tab
+
+# Load completions
+autoload -Uz compinit && compinit
+
+zinit cdreplay -q
+
+
+# History
+HISTSIZE=5000
+HISTFILE=~/.zsh_history
+SAVEHIST=$HISTSIZE
+HISTDUP=erase
+setopt appendhistory
+setopt sharehistory
+setopt hist_ignore_space
+setopt hist_ignore_all_dups
+setopt hist_save_no_dups
+setopt hist_ignore_dups
+setopt hist_find_no_dups
+
+# Completion styling
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' menu no
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
+zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
+
+# Autocorrect commands
+setopt correct
+
+# Shell integrations
+eval "$(fzf --zsh)"
+
+# Aliases
 alias ls='ls -a --color'
+alias ..="cd .."
 alias src='source ~/.zshrc'
 alias dotfiles="/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
 alias vim="nvim"
 alias code="cursor"
+alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 
-# Color Scheme
-export BLACK=0xff181819
-export WHITE=0xffe2e2e3
-export RED=0xfffc5d7c
-export GREEN=0xff9ed072
-export BLUE=0xff76cce0
-export YELLOW=0xffe7c664
-export ORANGE=0xfff39660
-export MAGENTA=0xffb39df3
-export GREY=0xff7f8490
-export TRANSPARENT=0x00000000
-export BG0=0xff2c2e34
-export BG1=0xff363944
-
-# -- END PERSONAL CUSTOMIZATIONS -- 
-
-# Add deno completions to search path
-if [[ ":$FPATH:" != *":/Users/levi/.zsh/completions:"* ]]; then export FPATH="/Users/levi/.zsh/completions:$FPATH"; fi
-export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
-
-
-# Go pkgsite
-export PATH="$HOME/go/bin/:$PATH"
-
-# pnpm
-export PNPM_HOME="/Users/levi/Library/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
-# pnpm end
-
-# bun completions
-[ -s "/Users/levi/.bun/_bun" ] && source "/Users/levi/.bun/_bun"
-
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
-
-autoload -U +X bashcompinit && bashcompinit
-complete -o nospace -C /opt/homebrew/bin/terraform terraform
+eval "$(zoxide init --cmd cd zsh)" # Better `cd`. See https://github.com/ajeetdsouza/zoxide
+eval "$(starship init zsh)" # Prompt. see https://starship.sh
