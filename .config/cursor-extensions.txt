@@ -1,0 +1,5 @@
+esbenp.prettier-vscode
+sqrtt.prophet
+vscodevim.vim
+wayou.vscode-todo-highlight
+zhuangtongfa.material-theme
