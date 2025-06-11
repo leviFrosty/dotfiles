@@ -19,7 +19,7 @@ config.colors = {
 	brights = { "#214969", "#E52E2E", "#44FFB1", "#FFE073", "#A277FF", "#a277ff", "#24EAF7", "#24EAF7" },
 }
 
-config.font = wezterm.font("Jetbrains Mono")
+config.font = wezterm.font("JetbrainsMono Nerd Font")
 config.font_size = 20
 
 config.enable_tab_bar = false
@@ -30,3 +30,4 @@ config.macos_window_background_blur = 10
 
 -- and finally, return the configuration to wezterm
 return config
+
