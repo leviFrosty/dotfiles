@@ -58,8 +58,28 @@ alias ..="cd .."
 alias src='source ~/.zshrc'
 alias dotfiles="/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
 alias vim="nvim"
-alias code="cursor"
 alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
+
+# Track vscode / cursor extensions
+if [ "$PWD" = "$HOME" ]; then
+  mkdir -p "$HOME/.config"
+
+  # Write extensions to config file
+  [ -x "$(command -v code)" ] && code --list-extensions > "$HOME/.config/vscode-extensions.txt"
+  [ -x "$(command -v cursor)" ] && cursor --list-extensions > "$HOME/.config/cursor-extensions.txt"
+
+  # If cursor different, commit changes
+  if [ -f "$HOME/.config/cursor-extensions.txt" ] && ! dotfiles diff --quiet "$HOME/.config/cursor-extensions.txt"; then
+    dotfiles add .config/cursor-extensions.txt
+    dotfiles commit -m "update cursor extensions"
+  fi
+
+  # If vscode different, commit changes
+  if [ -f "$HOME/.config/vscode-extensions.txt" ] && ! dotfiles diff --quiet "$HOME/.config/vscode-extensions.txt"; then
+    dotfiles add .config/vscode-extensions.txt
+    dotfiles commit -m "update vscode extensions"
+  fi
+fi
 
 eval "$(zoxide init --cmd cd zsh)" # Better `cd`. See https://github.com/ajeetdsouza/zoxide
 eval "$(starship init zsh)" # Prompt. see https://starship.sh
