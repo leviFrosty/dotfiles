@@ -366,6 +366,10 @@
     "key": "space 5",
     "command": "vscode-harpoon.gotoEditor5",
     "when": "vim.mode == 'Normal' && (editorTextFocus || !inputFocus)"
+  },
+  {
+    "key": "cmd+i",
+    "command": "composerMode.agent"
   }
   // HARPOON END
 ]

@@ -1,5 +1,9 @@
+bradlc.vscode-tailwindcss
 esbenp.prettier-vscode
+golang.go
+pkief.material-icon-theme
 sqrtt.prophet
+streetsidesoftware.code-spell-checker
 vscodevim.vim
 wayou.vscode-todo-highlight
 zhuangtongfa.material-theme

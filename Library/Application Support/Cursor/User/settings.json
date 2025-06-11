@@ -165,7 +165,7 @@
   "git.confirmSync": false,
   "git.autoStash": true,
   "git.autofetch": true,
-  "window.commandCenter": false,
+  "window.commandCenter": true,
   "zenMode.fullScreen": true,
   "zenMode.hideLineNumbers": false,
   "terminal.integrated.profiles.windows": {
@@ -183,5 +183,5 @@
   "explorer.confirmPasteNative": false,
   "terminal.integrated.scrollback": 5000,
   "terminal.integrated.enableMultiLinePasteWarning": "never",
-  "workbench.activityBar.orientation": "vertical"
+  "workbench.activityBar.orientation": "horizontal"
 }
