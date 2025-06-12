@@ -80,7 +80,7 @@
   "workbench.iconTheme": "material-icon-theme",
   "editor.scrollbar.verticalScrollbarSize": 12,
   "editor.cursorBlinking": "solid",
-  "editor.fontSize": 23,
+  "editor.fontSize": 25,
   "editor.lineHeight": 31,
   "editor.fontFamily": "JetBrainsMono Nerd Font Mono, Fira Code, Courier New, monospace",
   "editor.fontLigatures": true,
