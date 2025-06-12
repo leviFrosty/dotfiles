@@ -82,12 +82,11 @@
   "editor.cursorBlinking": "solid",
   "editor.fontSize": 23,
   "editor.lineHeight": 31,
-  "editor.fontFamily": "Jetbrains Mono, Fira Code, Courier New, monospace",
+  "editor.fontFamily": "JetBrainsMono Nerd Font Mono, Fira Code, Courier New, monospace",
   "editor.fontLigatures": true,
   "editor.minimap.enabled": false,
   "workbench.colorTheme": "One Dark Pro",
-  "terminal.integrated.fontSize": 16,
-  "terminal.integrated.fontFamily": "Jetbrains Mono, Fira Code",
+  "terminal.integrated.fontSize": 15,
   "workbench.colorCustomizations": {
     "editorOverviewRuler.border": "#0000",
     "editorOverviewRuler.findMatchForeground": "#f6ff0065",
@@ -183,5 +182,11 @@
   "explorer.confirmPasteNative": false,
   "terminal.integrated.scrollback": 5000,
   "terminal.integrated.enableMultiLinePasteWarning": "never",
-  "workbench.activityBar.orientation": "horizontal"
+  "workbench.activityBar.orientation": "vertical",
+  "[terraform]": {
+    "editor.defaultFormatter": "hashicorp.terraform"
+  },
+  "[terraform-vars]": {
+    "editor.defaultFormatter": "hashicorp.terraform"
+  }
 }
