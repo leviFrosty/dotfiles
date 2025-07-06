@@ -280,8 +280,13 @@
     "when": "vim.mode == 'Normal' && editorTextFocus"
   },
   {
-    "key": "space f f",
+    "key": "space f f", // [F]ind [F]ile
     "command": "workbench.action.quickOpen",
+    "when": "vim.mode == 'Normal' && (editorTextFocus || !inputFocus)"
+  },
+  {
+    "key": "space f g", // [F]ind [G]rep,
+    "command": "workbench.action.findInFiles",
     "when": "vim.mode == 'Normal' && (editorTextFocus || !inputFocus)"
   },
   {

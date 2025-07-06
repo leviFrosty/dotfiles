@@ -20,7 +20,7 @@ config.colors = {
 }
 
 config.font = wezterm.font("JetBrainsMono Nerd Font Mono")
-config.font_size = 20
+config.font_size = 24
 
 config.enable_tab_bar = false
 
