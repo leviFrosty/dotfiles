@@ -1,4 +1,7 @@
 {
+  // =========================
+  // ======= VIM OPTS ========
+  // ========================
   "vim.normalModeKeyBindingsNonRecursive": [
     {
       "before": ["<Esc>"],
@@ -27,6 +30,9 @@
   "vim.smartRelativeLine": true,
   "vim.surround": true,
   "vim.easymotion": true,
+  // ==========================
+  // ======= LANG OPTS ========
+  // ==========================
   "javascript.updateImportsOnFileMove.enabled": "always",
   "javascript.preferGoToSourceDefinition": true,
   "typescript.preferGoToSourceDefinition": true,
@@ -45,21 +51,19 @@
   "extensions.experimental.affinity": {
     "vscodevim.vim": 1
   },
-  "todohighlight.keywords": [
-    {
-      "text": "NOTE:",
-      "color": "#3c3c3c",
-      "backgroundColor": "lightblue"
-    }
-  ],
+  "[terraform]": {
+    "editor.defaultFormatter": "hashicorp.terraform"
+  },
+  "[terraform-vars]": {
+    "editor.defaultFormatter": "hashicorp.terraform"
+  },
+  // ===============================
+  // ======= EXTENSION OPTS ========
+  // ===============================
   "gitlens.showWhatsNewAfterUpgrades": false,
   "gitlens.defaultGravatarsStyle": "retro",
   "gitlens.plusFeatures.enabled": false,
   "gitlens.codeLens.enabled": false,
-  "cSpell.spellCheckDelayMs": 350,
-  "cSpell.textDecorationColor": "lightblue",
-  "cSpell.overviewRulerColor": "",
-  "cSpell.suggestionsTimeout": 500,
   "tailwindCSS.experimental.classRegex": [
     ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
     ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
@@ -69,9 +73,18 @@
     "javascriptreact",
     "typescriptreact"
   ],
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "oneDarkPro.bold": true,
   "oneDarkPro.vivid": true,
+  "todohighlight.keywords": [
+    {
+      "text": "NOTE:",
+      "color": "#3c3c3c",
+      "backgroundColor": "lightblue"
+    }
+  ],
+  // ======================
+  // ======= THEME ========
+  // ======================
   "breadcrumbs.symbolPath": "off",
   "breadcrumbs.icons": false,
   "window.systemColorTheme": "dark",
@@ -146,47 +159,38 @@
   "zenMode.hideStatusBar": false,
   "window.density.editorTabHeight": "compact",
   "workbench.editor.showTabs": "multiple",
+  "window.commandCenter": true,
+  "zenMode.fullScreen": true,
+  "zenMode.hideLineNumbers": false,
+  "workbench.startupEditor": "welcomePageInEmptyWorkbench",
+  "workbench.activityBar.orientation": "vertical",
+  // ================================
+  // ======= EDITOR BEHAVIOR ========
+  // ================================
   "editor.linkedEditing": true,
   "files.autoSave": "onWindowChange",
   "editor.formatOnSave": true,
   "terminal.integrated.commandsToSkipShell": ["workbench.action.closePanel"],
-  "terminal.integrated.defaultProfile.windows": "Windows PowerShell",
   "editor.accessibilitySupport": "off",
-  "git.openRepositoryInParentFolders": "always",
   "extensions.ignoreRecommendations": true,
-  "settingsSync.keybindingsPerPlatform": false,
-  "telemetry.telemetryLevel": "off",
   "security.workspace.trust.banner": "never",
   "security.workspace.trust.untrustedFiles": "open",
   "security.workspace.trust.startupPrompt": "never",
   "security.workspace.trust.enabled": false,
+  "git.openRepositoryInParentFolders": "always",
   "git.enableSmartCommit": true,
   "git.confirmSync": false,
   "git.autoStash": true,
   "git.autofetch": true,
-  "window.commandCenter": true,
-  "zenMode.fullScreen": true,
-  "zenMode.hideLineNumbers": false,
-  "terminal.integrated.profiles.windows": {
-    "PowerShell": {
-      "path": "pwsh",
-      "icon": "terminal-powershell"
-    }
-  },
-  "terminal.integrated.env.windows": {
-    "PATH": "${env:PATH};${workspaceRoot}\\node_modules\\.bin;${env:PNPM_HOME}"
-  },
   "explorer.confirmDragAndDrop": false,
-  "workbench.startupEditor": "welcomePageInEmptyWorkbench",
   "explorer.confirmDelete": false,
   "explorer.confirmPasteNative": false,
-  "terminal.integrated.scrollback": 5000,
+  "terminal.integrated.scrollback": 10000,
   "terminal.integrated.enableMultiLinePasteWarning": "never",
-  "workbench.activityBar.orientation": "vertical",
-  "[terraform]": {
-    "editor.defaultFormatter": "hashicorp.terraform"
+  "gitlens.statusBar.enabled": false,
+  "workbench.editorAssociations": {
+    "git-rebase-todo": "default"
   },
-  "[terraform-vars]": {
-    "editor.defaultFormatter": "hashicorp.terraform"
-  }
+  "gitlens.terminalLinks.enabled": false,
+  "diffEditor.ignoreTrimWhitespace": false
 }
