@@ -1,6 +1,8 @@
 bradlc.vscode-tailwindcss
+eamodio.gitlens
 esbenp.prettier-vscode
 golang.go
+hashicorp.terraform
 pkief.material-icon-theme
 sqrtt.prophet
 streetsidesoftware.code-spell-checker

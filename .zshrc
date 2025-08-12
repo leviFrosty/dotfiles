@@ -71,3 +71,4 @@ fi
 
 eval "$(zoxide init --cmd cd zsh)" # Better `cd`. See https://github.com/ajeetdsouza/zoxide
 eval "$(starship init zsh)" # Prompt. see https://starship.sh
+export PATH="$HOME/.local/bin:$PATH"
