@@ -197,5 +197,8 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "cursor.composer.shouldChimeAfterChatFinishes": true,
-  "cursor.composer.usageSummaryDisplay": "always"
+  "cursor.composer.usageSummaryDisplay": "never",
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }

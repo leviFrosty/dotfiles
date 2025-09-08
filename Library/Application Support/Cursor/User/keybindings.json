@@ -226,12 +226,12 @@
   },
   {
     "key": "ctrl+n",
-    "command": "workbench.action.toggleSidebarVisibility",
+    "command": "workbench.action.toggleSidebarVisibility"
   },
 
   // =========================
   // ======= TERMINAL ========
-  // ========================= 
+  // =========================
   {
     "key": "ctrl+shift+j",
     "command": "workbench.action.togglePanel"
@@ -257,10 +257,9 @@
     "when": "terminalFocus"
   },
 
-
   // =======================
   // ======= EDITOR ========
-  // ======================= 
+  // =======================
   {
     "key": "tab",
     "command": "selectNextSuggestion",
@@ -331,7 +330,6 @@
     "command": "-workbench.action.files.newUntitledFile"
   },
 
-
   // ========================
   // ======= HARPOON ========
   // ========================
@@ -392,4 +390,8 @@
     "key": "cmd+e",
     "command": "composerMode.background"
   },
+  {
+    "key": "cmd+escape",
+    "command": "-claude-code.runClaude.keyboard"
+  }
 ]
