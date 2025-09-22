@@ -48,9 +48,6 @@
     "editor.defaultFormatter": "golang.go"
   },
   "go.toolsManagement.autoUpdate": true,
-  "extensions.experimental.affinity": {
-    "vscodevim.vim": 1
-  },
   "[terraform]": {
     "editor.defaultFormatter": "hashicorp.terraform"
   },
@@ -82,6 +79,9 @@
       "backgroundColor": "lightblue"
     }
   ],
+  "extensions.experimental.affinity": {
+    "vscodevim.vim": 1
+  },
   // ======================
   // ======= THEME ========
   // ======================
@@ -199,6 +199,11 @@
   "cursor.composer.shouldChimeAfterChatFinishes": true,
   "cursor.composer.usageSummaryDisplay": "never",
   "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "editor.tabSize": 3,
+  "editor.insertSpaces": true,
+  "[jsonc]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 }

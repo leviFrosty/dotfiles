@@ -1,3 +1,6 @@
+# Aliases and Shortcuts
+alias note='afplay /System/Library/Sounds/Glass.aiff'
+
 # Set the directory we want to store zinit and plugins
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 
@@ -69,6 +72,13 @@ if [ "$PWD" = "$HOME" ]; then
   [ -x "$(command -v cursor)" ] && cursor --list-extensions > "$HOME/.config/cursor-extensions.txt"
 fi
 
-eval "$(zoxide init --cmd cd zsh)" # Better `cd`. See https://github.com/ajeetdsouza/zoxide
-eval "$(starship init zsh)" # Prompt. see https://starship.sh
+
 export PATH="$HOME/.local/bin:$PATH"
+
+# Expo Eas CLI
+eval 
+EAS_AC_ZSH_SETUP_PATH=/Users/levi/Library/Caches/eas-cli/autocomplete/zsh_setup && test -f $EAS_AC_ZSH_SETUP_PATH && source $EAS_AC_ZSH_SETUP_PATH; # eas autocomplete setup
+
+eval "$(starship init zsh)" # Prompt. see https://starship.sh
+eval "$(zoxide init --cmd cd zsh)" # Better `cd`. See https://github.com/ajeetdsouza/zoxide
+

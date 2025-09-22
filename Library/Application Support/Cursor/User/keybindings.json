@@ -387,10 +387,6 @@
     "when": "composerFocused && !editorTextFocus || !editorTextFocus && focusedView =~ /^workbench.panel.aichat.view/"
   },
   {
-    "key": "cmd+e",
-    "command": "composerMode.background"
-  },
-  {
     "key": "cmd+escape",
     "command": "-claude-code.runClaude.keyboard"
   }
