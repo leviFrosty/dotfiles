@@ -18,6 +18,12 @@ brew bundle --file=~/Brewfile
 source ~/.zshrc
 ```
 
+Aside: how to open Lazygit in dotfiles bare git repo
+
+```shell
+lazygit --git-dir=$HOME/.dotfiles --work-tree=$HOME
+```
+
 If some of the dotfiles are already present, you will see errors.
 
 ```
