@@ -68,7 +68,8 @@
   "auto-close-tag.activationOnLanguage": [
     "html",
     "javascriptreact",
-    "typescriptreact"
+    "typescriptreact",
+    "vue"
   ],
   "oneDarkPro.bold": true,
   "oneDarkPro.vivid": true,
@@ -82,6 +83,7 @@
   "extensions.experimental.affinity": {
     "vscodevim.vim": 1
   },
+  "todo-tree.filtering.excludeGlobs": ["**/node_modules/**"],
   // ======================
   // ======= THEME ========
   // ======================
@@ -98,7 +100,7 @@
   "editor.fontFamily": "JetBrainsMono Nerd Font Mono, Fira Code, Courier New, monospace",
   "editor.fontLigatures": true,
   "editor.minimap.enabled": false,
-  "workbench.colorTheme": "One Dark Pro",
+  "workbench.colorTheme": "One Dark Pro Night Flat",
   "terminal.integrated.fontSize": 15,
   "workbench.colorCustomizations": {
     "editorOverviewRuler.border": "#0000",
@@ -159,11 +161,13 @@
   "zenMode.hideStatusBar": false,
   "window.density.editorTabHeight": "compact",
   "workbench.editor.showTabs": "multiple",
-  "window.commandCenter": true,
   "zenMode.fullScreen": true,
   "zenMode.hideLineNumbers": false,
   "workbench.startupEditor": "welcomePageInEmptyWorkbench",
   "workbench.activityBar.orientation": "vertical",
+  "breadcrumbs.enabled": false,
+  "window.restoreWindows": "none",
+  "explorer.autoReveal": false,
   // ================================
   // ======= EDITOR BEHAVIOR ========
   // ================================
@@ -193,17 +197,22 @@
   },
   "gitlens.terminalLinks.enabled": false,
   "diffEditor.ignoreTrimWhitespace": false,
+  "cursor.composer.shouldChimeAfterChatFinishes": true,
+  "cursor.composer.usageSummaryDisplay": "never",
+  "[vue]": {
+    "editor.defaultFormatter": "Vue.volar"
+  },
+  "json.schemaDownload.enable": true,
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "cursor.composer.shouldChimeAfterChatFinishes": true,
-  "cursor.composer.usageSummaryDisplay": "never",
-  "[typescriptreact]": {
+  "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "editor.tabSize": 3,
-  "editor.insertSpaces": true,
-  "[jsonc]": {
+  "[markdown]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 }

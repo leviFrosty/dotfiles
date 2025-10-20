@@ -5,7 +5,18 @@
   // =============================
   {
     "key": "space w", // [W]rite current file,
-    "command": "workbench.action.files.save",
+    "command": "runCommands",
+    "args": {
+      "commands": [
+        "workbench.action.files.save",
+        "editor.action.formatDocument"
+      ]
+    },
+    "when": "vim.mode == 'Normal' && editorTextFocus"
+  },
+  {
+    "key": "space d", // Write current file WITHOUT formatting,
+    "command": "workbench.action.files.saveWithoutFormatting",
     "when": "vim.mode == 'Normal' && editorTextFocus"
   },
   {
@@ -17,14 +28,8 @@
     "when": "vim.mode == 'Normal' && (editorTextFocus || !inputFocus)"
   },
   {
-    "key": "space q", // [Q]uit & save
-    "command": "runCommands",
-    "args": {
-      "commands": [
-        "workbench.action.files.save",
-        "workbench.action.closeActiveEditor"
-      ]
-    },
+    "key": "space q", // [Q]uit
+    "command": "workbench.action.closeActiveEditor",
     "when": "vim.mode == 'Normal' && editorTextFocus"
   },
   {
@@ -92,7 +97,11 @@
     "command": "editor.action.showHover",
     "when": "vim.mode == 'Normal' && editorTextFocus"
   },
-
+  {
+    "key": "space f m", // [F]or[m]at
+    "command": "editor.action.formatDocument",
+    "when": "vim.mode == 'Normal' && editorTextFocus"
+  },
   // ================================
   // ======= PANE MANAGEMENT ========
   // ================================
@@ -112,7 +121,6 @@
     "key": "ctrl-j",
     "command": "workbench.action.navigateDown"
   },
-
   // ========================
   // ======= BUFFERS ========
   // ========================
@@ -131,7 +139,6 @@
     "command": "workbench.action.closeOtherEditors",
     "when": "(vim.mode == 'Normal' || vim.mode == 'Visual') && (editorTextFocus || !inputFocus)"
   },
-
   // ==========================
   // ======= FILE TREE ========
   // ==========================
@@ -228,7 +235,6 @@
     "key": "ctrl+n",
     "command": "workbench.action.toggleSidebarVisibility"
   },
-
   // =========================
   // ======= TERMINAL ========
   // =========================
@@ -256,7 +262,6 @@
     "command": "workbench.action.terminal.kill",
     "when": "terminalFocus"
   },
-
   // =======================
   // ======= EDITOR ========
   // =======================
@@ -329,7 +334,6 @@
     "key": "cmd+n",
     "command": "-workbench.action.files.newUntitledFile"
   },
-
   // ========================
   // ======= HARPOON ========
   // ========================
@@ -377,7 +381,6 @@
     "key": "cmd+i",
     "command": "composerMode.agent"
   },
-
   // =======================
   // ======= CURSOR ========
   // =======================
@@ -389,5 +392,13 @@
   {
     "key": "cmd+escape",
     "command": "-claude-code.runClaude.keyboard"
+  },
+  {
+    "key": "shift+enter",
+    "command": "workbench.action.terminal.sendSequence",
+    "args": {
+      "text": "\\\r\n"
+    },
+    "when": "terminalFocus"
   }
 ]

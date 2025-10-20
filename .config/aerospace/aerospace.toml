@@ -178,6 +178,18 @@ run = "move-node-to-workspace terminal"
 if.app-id = 'com.microsoft.VSCode'
 run = "move-node-to-workspace ide"
 
+[[on-window-detected]]
+if.app-id = 'com.apple.iphonesimulator'
+run = "move-node-to-workspace ide"
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'Cursor' # This is used in case Cursor changes their app id in the future
+run = "move-node-to-workspace ide"
+
+[[on-window-detected]]
+if.app-id = 'com.todesktop.230313mzl4w4u92'
+run = "move-node-to-workspace ide"
+
 # Music
 [[on-window-detected]]
 if.app-id = 'com.spotify.client'
@@ -213,10 +225,3 @@ run = "move-node-to-workspace chat"
 if.app-id = 'com.microsoft.teams2'
 run = "move-node-to-workspace chat"
 
-[[on-window-detected]]
-if.app-name-regex-substring = 'Cursor' # This is used in case Cursor changes their app id in the future
-run = "move-node-to-workspace ide"
-
-[[on-window-detected]]
-if.app-id = 'com.todesktop.230313mzl4w4u92'
-run = "move-node-to-workspace ide"
