@@ -95,8 +95,8 @@
   "workbench.iconTheme": "material-icon-theme",
   "editor.scrollbar.verticalScrollbarSize": 12,
   "editor.cursorBlinking": "solid",
-  "editor.fontSize": 25,
-  "editor.lineHeight": 31,
+  "editor.fontSize": 23,
+  "editor.lineHeight": 28,
   "editor.fontFamily": "JetBrainsMono Nerd Font Mono, Fira Code, Courier New, monospace",
   "editor.fontLigatures": true,
   "editor.minimap.enabled": false,
@@ -165,7 +165,7 @@
   "zenMode.hideLineNumbers": false,
   "workbench.startupEditor": "welcomePageInEmptyWorkbench",
   "workbench.activityBar.orientation": "vertical",
-  "breadcrumbs.enabled": false,
+  "breadcrumbs.enabled": true,
   "window.restoreWindows": "none",
   "explorer.autoReveal": false,
   // ================================
@@ -213,6 +213,15 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 }

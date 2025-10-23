@@ -1,4 +1,6 @@
 anthropic.claude-code
+bierner.markdown-mermaid
+bpruitt-goddard.mermaid-markdown-syntax-highlighting
 bradlc.vscode-tailwindcss
 catppuccin.catppuccin-vsc
 davidanson.vscode-markdownlint
@@ -9,6 +11,7 @@ esbenp.prettier-vscode
 formulahendry.auto-close-tag
 golang.go
 gruntfuggly.todo-tree
+humao.rest-client
 mikestead.dotenv
 oven.bun-vscode
 pkief.material-icon-theme
