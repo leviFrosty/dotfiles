@@ -14,9 +14,13 @@ alias grep='rg'
 # Aliases - Git
 alias ga="git add"
 alias gc="git commit"
+alias gcf="git commit --fixup"
+alias gca="git commit --amend"
 alias gs="git status"
-alias gl="git log"
+alias gl="git log --oneline"
 alias gp="git push"
+alias gpf="git push --force-with-lease"
+
 
 # Set the directory we want to store zinit and plugins
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
@@ -106,5 +110,14 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 export RUST_INSTALL="$HOME/.cargo"
 export PATH="$RUST_INSTALL/bin:$PATH"
 
+# Added by Windsurf
+export PATH="/Users/levi/.codeium/windsurf/bin:$PATH"
+
+# Bethel VS Code settings setup
+bethel-vscode-setup() {
+    bash "$HOME/dev/bethel/setup-vscode.sh" "$HOME/dev/bethel"
+}
+
 eval "$(starship init zsh)" # Prompt. see https://starship.sh
 eval "$(zoxide init --cmd cd zsh)" # Better `cd`. See https://github.com/ajeetdsouza/zoxide
+
