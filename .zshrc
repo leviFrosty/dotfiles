@@ -20,6 +20,14 @@ alias gs="git status"
 alias gl="git log --oneline"
 alias gp="git push"
 alias gpf="git push --force-with-lease"
+gbl() {
+  for branch in $(git branch -r | grep -v HEAD); do
+    local date_info=$(git show --format="%cd %cr" --date=format:'%m/%d/%y' "$branch" | head -n 1)
+    # Strip "origin/" prefix but keep "upstream/" prefix
+    local display_branch=${branch#origin/}
+    echo -e "${date_info}\t${display_branch}"
+  done | sort
+}
 
 
 # Set the directory we want to store zinit and plugins

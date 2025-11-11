@@ -190,6 +190,10 @@ run = "move-node-to-workspace ide"
 if.app-id = 'com.todesktop.230313mzl4w4u92'
 run = "move-node-to-workspace ide"
 
+[[on-window-detected]]
+if.app-id = 'com.exafunction.windsurf'
+run = "move-node-to-workspace ide"
+
 # Music
 [[on-window-detected]]
 if.app-id = 'com.spotify.client'

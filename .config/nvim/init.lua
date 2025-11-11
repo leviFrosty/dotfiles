@@ -26,6 +26,16 @@ require("lazy").setup({
   },
 
   { import = "plugins" },
+  {
+    "nvim-telescope/telescope.nvim",
+    opts = {
+      defaults = {
+        file_ignore_patterns = {
+          "package-lock.json",
+        },
+      },
+    },
+  },
 }, lazy_config)
 
 -- load theme
