@@ -65,7 +65,9 @@ brew bundle dump --describe --file=~/Brewfile --force
 brew bundle --file=~/Brewfile
 ```
 
-## Install Sketchybar from FelixKratz
+## Install Sketchybar from FelixKratz (No longer used)
+
+Due to visual conflicts with the native MacOS menu bar, I removed Sketchybar. I have the MacOS menu bar set to autohide.
 
 [Source](https://github.com/FelixKratz/dotfiles/tree/master)
 
