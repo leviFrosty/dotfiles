@@ -11,12 +11,13 @@ esbenp.prettier-vscode
 formulahendry.auto-close-tag
 golang.go
 gruntfuggly.todo-tree
-humao.rest-client
 mikestead.dotenv
 oven.bun-vscode
 pkief.material-icon-theme
 rust-lang.rust-analyzer
+stkb.rewrap
 streetsidesoftware.code-spell-checker
+stylelint.vscode-stylelint
 tamasfe.even-better-toml
 tauri-apps.tauri-vscode
 tobias-z.vscode-harpoon
