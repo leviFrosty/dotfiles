@@ -197,8 +197,6 @@
   },
   "gitlens.terminalLinks.enabled": false,
   "diffEditor.ignoreTrimWhitespace": false,
-  "cursor.composer.shouldChimeAfterChatFinishes": true,
-  "cursor.composer.usageSummaryDisplay": "never",
   "[vue]": {
     "editor.defaultFormatter": "Vue.volar"
   },

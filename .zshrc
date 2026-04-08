@@ -29,6 +29,8 @@ export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
 #### -------------------------------------------------
 #### 2. Aliases (from your original config)
 #### -------------------------------------------------
+alias code='codium'
+alias claude-danger="claude --dangerously-skip-permissions"
 alias ls='eza --all --icons'
 alias lsl='eza --all --header --git --icons --long --no-permissions'
 alias ..="cd .."
@@ -84,3 +86,7 @@ znap source zsh-users/zsh-autosuggestions
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion

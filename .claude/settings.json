@@ -1,4 +1,6 @@
 {
+  "includeCoAuthoredBy": false,
+  "model": "sonnet",
   "hooks": {
     "Stop": [
       {
@@ -11,14 +13,15 @@
       }
     ]
   },
+  "statusLine": {
+    "type": "command",
+    "command": "bunx -y ccstatusline@latest",
+    "padding": 0
+  },
   "voiceEnabled": true,
   "voice": {
     "enabled": true,
     "mode": "hold"
   },
-  "statusLine": {
-    "type": "command",
-    "command": "bunx -y ccstatusline@latest",
-    "padding": 0
-  }
+  "skipDangerousModePermissionPrompt": true
 }

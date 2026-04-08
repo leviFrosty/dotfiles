@@ -378,22 +378,6 @@
     "when": "vim.mode == 'Normal' && (editorTextFocus || !inputFocus)"
   },
   {
-    "key": "cmd+i",
-    "command": "composerMode.agent"
-  },
-  // =======================
-  // ======= CURSOR ========
-  // =======================
-  {
-    "key": "escape",
-    "command": "composer.closeComposerTab",
-    "when": "composerFocused && !editorTextFocus || !editorTextFocus && focusedView =~ /^workbench.panel.aichat.view/"
-  },
-  {
-    "key": "cmd+escape",
-    "command": "-claude-code.runClaude.keyboard"
-  },
-  {
     "key": "shift+enter",
     "command": "workbench.action.terminal.sendSequence",
     "args": {

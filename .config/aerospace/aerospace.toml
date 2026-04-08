@@ -127,6 +127,7 @@ automatically-unhide-macos-hidden-apps = true
     alt-i = 'workspace ide'
     alt-t = 'workspace terminal'
     alt-c = 'workspace chat'
+    alt-z = 'workspace long-running'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
     alt-shift-r = 'move-node-to-workspace rest'
@@ -135,6 +136,7 @@ automatically-unhide-macos-hidden-apps = true
     alt-shift-i = 'move-node-to-workspace ide'
     alt-shift-t = 'move-node-to-workspace terminal'
     alt-shift-c = 'move-node-to-workspace chat'
+    alt-shift-z = 'move-node-to-workspace long-running'
 
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#workspace-back-and-forth
@@ -180,6 +182,10 @@ run = "move-node-to-workspace ide"
 
 [[on-window-detected]]
 if.app-id = 'com.apple.iphonesimulator'
+run = "move-node-to-workspace ide"
+
+[[on-window-detected]]
+if.app-id = 'com.vscodium'
 run = "move-node-to-workspace ide"
 
 [[on-window-detected]]
