@@ -76,3 +76,11 @@ znap source zsh-users/zsh-autosuggestions
 # znap source marlonrichert/zsh-autocomplete
 # Initializes p10k theme
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# bun completions
+[ -s "/Users/levi/.bun/_bun" ] && source "/Users/levi/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"

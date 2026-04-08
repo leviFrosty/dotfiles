@@ -1,0 +1,24 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "osascript -e 'tell application \"System Events\" to set frontApp to name of first application process whose frontmost is true' -e 'if frontApp is not in {\"Terminal\", \"iTerm2\", \"kitty\", \"Alacritty\", \"Ghostty\", \"wezterm-gui\", \"WezTerm\", \"Hyper\", \"Warp\", \"Rio\", \"Claude\"} then' -e 'display notification \"Claude Code response complete\" with title \"Claude Code\"' -e 'end if'"
+          }
+        ]
+      }
+    ]
+  },
+  "voiceEnabled": true,
+  "voice": {
+    "enabled": true,
+    "mode": "hold"
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bunx -y ccstatusline@latest",
+    "padding": 0
+  }
+}
