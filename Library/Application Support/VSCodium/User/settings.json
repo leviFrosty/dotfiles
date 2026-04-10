@@ -222,5 +222,6 @@
   "[typescriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "diffEditor.renderSideBySide": false
+  "diffEditor.renderSideBySide": false,
+  "claudeCode.preferredLocation": "panel"
 }

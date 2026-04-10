@@ -25,12 +25,17 @@ fi
 #### 1. PATH
 #### -------------------------------------------------
 export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
+export PATH="/Users/levi/.codeium/windsurf/bin:$PATH"
+
 
 #### -------------------------------------------------
 #### 2. Aliases (from your original config)
 #### -------------------------------------------------
 alias code='codium'
+<<<<<<< Updated upstream
 alias claude-danger="claude --dangerously-skip-permissions"
+=======
+>>>>>>> Stashed changes
 alias ls='eza --all --icons'
 alias lsl='eza --all --header --git --icons --long --no-permissions'
 alias ..="cd .."
@@ -51,6 +56,7 @@ alias gs="git status"
 alias gl="git log --oneline"
 alias gp="git push"
 alias gpf="git push --force-with-lease"
+alias claude-danger="claude --dangerously-skip-permissions"
 gbl() {
   for branch in $(git branch -r | grep -v HEAD); do
     local date_info=$(git show --format="%cd %cr" --date=format:'%m/%d/%y' "$branch" | head -n 1)
@@ -59,6 +65,7 @@ gbl() {
     echo -e "${date_info}\t${display_branch}"
   done | sort
 }
+alias unsetAWS='unset $(env | grep AWS | grep -v AWS_REGION | grep -v AWS_DEFAULT_REGION | sed '\''s|=.*||'\'')'
 
 #### -------------------------------------------------
 #### 3. Environment & Editor
@@ -75,10 +82,12 @@ source ~/.zsh/znap/znap.zsh
 # Loads plugins
 znap source romkatv/powerlevel10k
 znap source zsh-users/zsh-autosuggestions
+znap source zsh-users/zsh-syntax-highlighting
 # znap source marlonrichert/zsh-autocomplete
 # Initializes p10k theme
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
+<<<<<<< Updated upstream
 # bun completions
 [ -s "/Users/levi/.bun/_bun" ] && source "/Users/levi/.bun/_bun"
 
@@ -90,3 +99,6 @@ export PATH="$HOME/.local/bin:$PATH"
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+=======
+export PATH="$HOME/.local/bin:$PATH"
+>>>>>>> Stashed changes

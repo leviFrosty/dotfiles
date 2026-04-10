@@ -142,7 +142,7 @@ automatically-unhide-macos-hidden-apps = true
     # See: https://nikitabobko.github.io/AeroSpace/commands#workspace-back-and-forth
     alt-tab = 'workspace-back-and-forth'
     # See: https://nikitabobko.github.io/AeroSpace/commands#move-workspace-to-monitor
-    alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
+    alt-shift-space = 'move-node-to-monitor --wrap-around --focus-follows-window next'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#mode
     alt-shift-semicolon = 'mode service'
@@ -216,6 +216,10 @@ run = "move-node-to-workspace browser"
 
 [[on-window-detected]]
 if.app-id = 'com.apple.Safari'
+run = "move-node-to-workspace browser"
+
+[[on-window-detected]]
+if.app-id = 'org.chromium.Chromium'
 run = "move-node-to-workspace browser"
 
 [[on-window-detected]]
