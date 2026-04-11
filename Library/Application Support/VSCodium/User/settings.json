@@ -7,18 +7,18 @@
       "before": ["<Esc>"],
       "when": ["editorFocus"],
       "commands": [":nohl"],
-      "silent": true
-    }
+      "silent": true,
+    },
   ],
   "vim.visualModeKeyBindings": [
     {
       "before": ["p"],
-      "after": ["P"]
-    }
+      "after": ["P"],
+    },
   ],
   "vim.handleKeys": {
     "<C-a>": false,
-    "<C-f>": false
+    "<C-f>": false,
   },
   "vim.incsearch": true,
   "vim.searchHighlightColor": "#f6ff0080",
@@ -39,20 +39,20 @@
   "debug.javascript.autoAttachFilter": "onlyWithFlag",
   "typescript.updateImportsOnFileMove.enabled": "always",
   "gopls": {
-    "ui.semanticTokens": true
+    "ui.semanticTokens": true,
   },
   "[go.mod]": {
-    "editor.defaultFormatter": "golang.go"
+    "editor.defaultFormatter": "golang.go",
   },
   "[go]": {
-    "editor.defaultFormatter": "golang.go"
+    "editor.defaultFormatter": "golang.go",
   },
   "go.toolsManagement.autoUpdate": true,
   "[terraform]": {
-    "editor.defaultFormatter": "hashicorp.terraform"
+    "editor.defaultFormatter": "hashicorp.terraform",
   },
   "[terraform-vars]": {
-    "editor.defaultFormatter": "hashicorp.terraform"
+    "editor.defaultFormatter": "hashicorp.terraform",
   },
   // ===============================
   // ======= EXTENSION OPTS ========
@@ -63,13 +63,13 @@
   "gitlens.codeLens.enabled": false,
   "tailwindCSS.experimental.classRegex": [
     ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
-    ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+    ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"],
   ],
   "auto-close-tag.activationOnLanguage": [
     "html",
     "javascriptreact",
     "typescriptreact",
-    "vue"
+    "vue",
   ],
   "oneDarkPro.bold": true,
   "oneDarkPro.vivid": true,
@@ -77,11 +77,11 @@
     {
       "text": "NOTE:",
       "color": "#3c3c3c",
-      "backgroundColor": "lightblue"
-    }
+      "backgroundColor": "lightblue",
+    },
   ],
   "extensions.experimental.affinity": {
-    "vscodevim.vim": 1
+    "vscodevim.vim": 1,
   },
   "todo-tree.filtering.excludeGlobs": ["**/node_modules/**"],
   // ======================
@@ -100,7 +100,7 @@
   "editor.fontFamily": "JetBrainsMono Nerd Font Mono, Fira Code, Courier New, monospace",
   "editor.fontLigatures": true,
   "editor.minimap.enabled": false,
-  "workbench.colorTheme": "One Dark Pro Night Flat",
+  "workbench.colorTheme": "One Dark Pro",
   "terminal.integrated.fontSize": 15,
   "workbench.colorCustomizations": {
     "editorOverviewRuler.border": "#0000",
@@ -113,7 +113,7 @@
     "editorOverviewRuler.addedForeground": "#16ed4f30",
     "editorOverviewRuler.deletedForeground": "#0000",
     "editorOverviewRuler.infoForeground": "#0000",
-    "editorOverviewRuler.bracketMatchForeground": "#0000"
+    "editorOverviewRuler.bracketMatchForeground": "#0000",
   },
   "editor.tokenColorCustomizations": {
     "textMateRules": [
@@ -150,13 +150,13 @@
           "text.html.basic entity.other.attribute-name",
           "tag.decorator.js entity.name.tag.js",
           "tag.decorator.js punctuation.definition.tag.js",
-          "source.js constant.other.object.key.js string.unquoted.label.js"
+          "source.js constant.other.object.key.js string.unquoted.label.js",
         ],
         "settings": {
-          "fontStyle": "italic"
-        }
-      }
-    ]
+          "fontStyle": "italic",
+        },
+      },
+    ],
   },
   "zenMode.hideStatusBar": false,
   "window.density.editorTabHeight": "compact",
@@ -193,35 +193,41 @@
   "terminal.integrated.enableMultiLinePasteWarning": "never",
   "gitlens.statusBar.enabled": false,
   "workbench.editorAssociations": {
-    "git-rebase-todo": "default"
+    "git-rebase-todo": "default",
   },
   "gitlens.terminalLinks.enabled": false,
   "diffEditor.ignoreTrimWhitespace": false,
   "[vue]": {
-    "editor.defaultFormatter": "Vue.volar"
+    "editor.defaultFormatter": "Vue.volar",
   },
   "json.schemaDownload.enable": true,
   "[jsonc]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
   },
   "[typescript]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
+    "editor.defaultFormatter": "vscode.typescript-language-features",
   },
   "[json]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
   },
   "[markdown]": {
-    "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
+    "editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
   },
   "[javascript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
   },
   "[css]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
   },
   "[typescriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
   },
   "diffEditor.renderSideBySide": false,
-  "claudeCode.preferredLocation": "panel"
+  "claudeCode.preferredLocation": "panel",
+  "files.readonlyInclude": {
+    "**/.cargo/registry/src/**/*.rs": true,
+    "**/.cargo/git/checkouts/**/*.rs": true,
+    "**/lib/rustlib/src/rust/library/**/*.rs": true,
+  },
+  "claudeCode.useTerminal": true,
 }

@@ -32,10 +32,7 @@ export PATH="/Users/levi/.codeium/windsurf/bin:$PATH"
 #### 2. Aliases (from your original config)
 #### -------------------------------------------------
 alias code='codium'
-<<<<<<< Updated upstream
 alias claude-danger="claude --dangerously-skip-permissions"
-=======
->>>>>>> Stashed changes
 alias ls='eza --all --icons'
 alias lsl='eza --all --header --git --icons --long --no-permissions'
 alias ..="cd .."
@@ -68,7 +65,19 @@ gbl() {
 alias unsetAWS='unset $(env | grep AWS | grep -v AWS_REGION | grep -v AWS_DEFAULT_REGION | sed '\''s|=.*||'\'')'
 
 #### -------------------------------------------------
-#### 3. Environment & Editor
+#### 3. Key Bindings
+#### -------------------------------------------------
+bindkey '\e[1;3D' backward-word   # Ctrl+Left  (WezTerm)
+bindkey '\e[1;3C' forward-word    # Ctrl+Right (WezTerm)
+bindkey '\e[1;5D' backward-word   # Ctrl+Left  (mod=5)
+bindkey '\e[1;5C' forward-word    # Ctrl+Right (mod=5)
+bindkey '\e[5D'   backward-word   # Ctrl+Left  (alternate)
+bindkey '\e[5C'   forward-word    # Ctrl+Right (alternate)
+bindkey '\eb'     backward-word   # Ctrl+Left  (VSCodium)
+bindkey '\ef'     forward-word    # Ctrl+Right (VSCodium)
+
+#### -------------------------------------------------
+#### 4. Environment & Editor
 #### -------------------------------------------------
 export EDITOR="nvim"
 
@@ -87,7 +96,6 @@ znap source zsh-users/zsh-syntax-highlighting
 # Initializes p10k theme
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-<<<<<<< Updated upstream
 # bun completions
 [ -s "/Users/levi/.bun/_bun" ] && source "/Users/levi/.bun/_bun"
 
@@ -99,6 +107,4 @@ export PATH="$HOME/.local/bin:$PATH"
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-=======
 export PATH="$HOME/.local/bin:$PATH"
->>>>>>> Stashed changes
