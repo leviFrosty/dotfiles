@@ -1,17 +1,7 @@
 {
   "includeCoAuthoredBy": false,
+  "model": "sonnet",
   "hooks": {
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "printf '{\"hookSpecificOutput\": {\"hookEventName\": \"SessionStart\", \"additionalContext\": %s}}' \"$(cat ~/.agents/skills/caveman/SKILL.md | jq -Rs .)\"",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
     "Stop": [
       {
         "hooks": [
@@ -29,13 +19,13 @@
     "padding": 0
   },
   "enabledPlugins": {
-    "cloudflare@claude-plugins-official": true
+    "cloudflare@claude-plugins-official": true,
+    "chrome-devtools-mcp@claude-plugins-official": true
   },
   "voiceEnabled": true,
   "voice": {
     "enabled": true,
     "mode": "hold"
   },
-  "skipDangerousModePermissionPrompt": true,
-  "model": "sonnet"
+  "skipDangerousModePermissionPrompt": true
 }
