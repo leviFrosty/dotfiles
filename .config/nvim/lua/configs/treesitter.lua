@@ -1,49 +1,39 @@
-local options = {
-  ensure_installed = {
-    "bash",
-    "go",
-    "gomod",
-    "gosum",
-    "gotmpl",
-    "gowork",
-    "lua",
-    "luadoc",
-    "markdown",
-    "terraform",
-    "html",
-    "css",
-    "printf",
-    "javascript",
-    "sql",
-    "typescript",
-    "python",
-    "toml",
-    "vim",
-    "vimdoc",
-    "yaml",
-    "jsdoc",
-    "tsx",
-  },
-
-  highlight = {
-    enable = true,
-    use_languagetree = true,
-  },
-
-  indent = { enable = true },
-
-  rainbow = {
-    enable = true,
-    extended_mode = false, -- only color brackets, not other delimiters
-    max_file_lines = nil,
-    colors = {
-      "#FF0000", -- Red for ()
-      "#00FF00", -- Green for []
-      "#0000FF", -- Blue for {}
-    },
-    -- Limit to 1 or 2 nested pairs to mimic VSCode's subtle style
-    -- If the plugin supports max_depth or similar, set here (some versions do)
-  },
+local parsers = {
+  "bash",
+  "go",
+  "gomod",
+  "gosum",
+  "gotmpl",
+  "gowork",
+  "lua",
+  "luadoc",
+  "markdown",
+  "terraform",
+  "html",
+  "css",
+  "printf",
+  "javascript",
+  "jsdoc",
+  "tsx",
+  "typescript",
+  "sql",
+  "python",
+  "toml",
+  "vim",
+  "vimdoc",
+  "yaml",
 }
 
-require("nvim-treesitter.configs").setup(options)
+require("nvim-treesitter").install(parsers)
+
+-- The `tsx` parser handles `.tsx` files, which Neovim detects as filetype
+-- `typescriptreact`. Register the mapping so vim.treesitter.start() finds it.
+vim.treesitter.language.register("tsx", { "typescriptreact" })
+
+vim.api.nvim_create_autocmd("FileType", {
+  callback = function(args)
+    if pcall(vim.treesitter.start, args.buf) then
+      vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+    end
+  end,
+})

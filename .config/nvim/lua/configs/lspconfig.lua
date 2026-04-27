@@ -1,7 +1,5 @@
-local on_init = require("nvchad.configs.lspconfig").on_init
+local nvchad_lsp = require("nvchad.configs.lspconfig")
 local map = vim.keymap.set
-
-local capabilities = require("nvchad.configs.lspconfig").capabilities
 
 local on_attach = function(_, bufnr)
   local function opts(desc)
@@ -16,65 +14,25 @@ local on_attach = function(_, bufnr)
   map("n", "<leader>rn", require("nvchad.lsp.renamer"), opts("NvRenamer"))
   map("n", "<leader>ca", vim.lsp.buf.code_action, opts("Code action"))
 end
-local lspconfig = require("lspconfig")
 
--- list of all servers configured.
-lspconfig.servers = {
-  "lua_ls",
-  "gopls",
-  "pyright",
-  "ts_ls",
-}
+dofile(vim.g.base46_cache .. "lsp")
+require("nvchad.lsp").diagnostic_config()
 
--- list of servers configured with default config.
-local default_servers = {
-  "pyright",
-  "ts_ls",
-}
-
--- lsps with default config
-for _, lsp in ipairs(default_servers) do
-  lspconfig[lsp].setup({
-    on_attach = on_attach,
-    on_init = on_init,
-    capabilities = capabilities,
-  })
-end
-
-lspconfig.gopls.setup({
-  on_attach = function(client, bufnr)
-    client.server_capabilities.documentFormattingProvider = false
-    client.server_capabilities.documentRangeFormattingProvider = false
-    on_attach(client, bufnr)
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(args)
+    on_attach(nil, args.buf)
   end,
-  on_init = on_init,
-  capabilities = capabilities,
-  cmd = { "gopls" },
-  filetypes = { "go", "gomod", "gotmpl", "gowork" },
-  root_dir = lspconfig.util.root_pattern("go.work", "go.mod", ".git"),
-  settings = {
-    gopls = {
-      analyses = {
-        unusedparams = true,
-      },
-      completeUnimported = true,
-      usePlaceholders = true,
-      staticcheck = true,
-    },
-  },
 })
 
-lspconfig.lua_ls.setup({
-  on_attach = on_attach,
-  on_init = on_init,
-  capabilities = capabilities,
+vim.lsp.config("*", {
+  on_init = nvchad_lsp.on_init,
+  capabilities = nvchad_lsp.capabilities,
+})
 
+vim.lsp.config("lua_ls", {
   settings = {
     Lua = {
-      diagnostics = {
-        enable = false, -- Disable all diagnostics from lua_ls
-        -- globals = { "vim" },
-      },
+      diagnostics = { enable = false },
       workspace = {
         library = {
           vim.fn.expand("$VIMRUNTIME/lua"),
@@ -90,43 +48,22 @@ lspconfig.lua_ls.setup({
   },
 })
 
-local M = {}
-M.defaults = function()
-  dofile(vim.g.base46_cache .. "lsp")
-  require("nvchad.lsp").diagnostic_config()
-
-  vim.api.nvim_create_autocmd("LspAttach", {
-    callback = function(args)
-      on_attach(_, args.buf)
-    end,
-  })
-
-  local lua_lsp_settings = {
-    Lua = {
-      workspace = {
-        library = {
-          vim.fn.expand("$VIMRUNTIME/lua"),
-          vim.fn.stdpath("data") .. "/lazy/ui/nvchad_types",
-          vim.fn.stdpath("data") .. "/lazy/lazy.nvim/lua/lazy",
-          "${3rd}/luv/library",
-        },
-      },
+vim.lsp.config("gopls", {
+  on_attach = function(client, _)
+    client.server_capabilities.documentFormattingProvider = false
+    client.server_capabilities.documentRangeFormattingProvider = false
+  end,
+  settings = {
+    gopls = {
+      analyses = { unusedparams = true },
+      completeUnimported = true,
+      usePlaceholders = true,
+      staticcheck = true,
     },
-  }
+  },
+})
 
-  -- Support 0.10 temporarily
+local servers = { "lua_ls", "gopls", "pyright", "ts_ls" }
+vim.lsp.enable(servers)
 
-  if vim.lsp.config then
-    vim.lsp.config("*", { capabilities = M.capabilities, on_init = M.on_init })
-    vim.lsp.config("lua_ls", { settings = lua_lsp_settings })
-    vim.lsp.enable("lua_ls")
-  else
-    require("lspconfig").lua_ls.setup({
-      capabilities = M.capabilities,
-      on_init = M.on_init,
-      settings = lua_lsp_settings,
-    })
-  end
-end
-
-return M
+return { servers = servers }

@@ -60,12 +60,12 @@ automatically-unhide-macos-hidden-apps = true
 #                 See:
 #                 https://nikitabobko.github.io/AeroSpace/guide#assign-workspaces-to-monitors
 [gaps]
-    inner.horizontal = [{monitor.PG32UCDP = 12}, 5]
-    inner.vertical =   [{monitor.PG32UCDP = 12}, 5]
-    outer.left =       [{monitor.PG32UCDP = 12}, 5]
-    outer.bottom =     [{monitor.PG32UCDP = 12}, 5]
-    outer.top =        [{monitor.PG32UCDP = 15}, 8]
-    outer.right =      [{monitor.PG32UCDP = 12}, 5]
+    inner.horizontal = [{monitor.PG32UCDP = 3}, 2]
+    inner.vertical =   [{monitor.PG32UCDP = 3}, 2]
+    outer.left =       [{monitor.PG32UCDP = 3}, 2]
+    outer.bottom =     [{monitor.PG32UCDP = 3}, 2]
+    outer.top =        [{monitor.PG32UCDP = 5}, 4]
+    outer.right =      [{monitor.PG32UCDP = 3}, 2]
 
 # 'main' binding mode declaration
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
@@ -239,3 +239,6 @@ run = "move-node-to-workspace chat"
 if.app-id = 'com.microsoft.teams2'
 run = "move-node-to-workspace chat"
 
+[[on-window-detected]]
+if.app-id = 'com.apple.iphonesimulator'
+run = 'layout tiling'

@@ -191,7 +191,7 @@
   "explorer.confirmPasteNative": false,
   "terminal.integrated.env.osx": {
     "COLORTERM": "truecolor",
-    "TERM": "xterm-256color"
+    "TERM": "xterm-256color",
   },
   "terminal.integrated.scrollback": 10000,
   "terminal.integrated.enableMultiLinePasteWarning": "never",
@@ -234,4 +234,7 @@
     "**/lib/rustlib/src/rust/library/**/*.rs": true,
   },
   "claudeCode.useTerminal": true,
+  "terminal.integrated.tabs.title": "${sequence}",
+  "terminal.integrated.tabs.description": "",
+  "terminal.integrated.tabs.location": "left",
 }

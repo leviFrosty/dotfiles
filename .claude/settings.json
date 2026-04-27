@@ -1,6 +1,5 @@
 {
   "includeCoAuthoredBy": false,
-  "model": "sonnet",
   "hooks": {
     "Stop": [
       {
@@ -20,12 +19,14 @@
   },
   "enabledPlugins": {
     "cloudflare@claude-plugins-official": true,
-    "chrome-devtools-mcp@claude-plugins-official": true
+    "chrome-devtools-mcp@claude-plugins-official": true,
+    "swift-lsp@claude-plugins-official": true
   },
-  "voiceEnabled": true,
+  "effortLevel": "xhigh",
   "voice": {
     "enabled": true,
     "mode": "hold"
   },
-  "skipDangerousModePermissionPrompt": true
+  "skipDangerousModePermissionPrompt": true,
+  "voiceEnabled": true
 }
