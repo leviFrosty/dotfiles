@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# work — open your project workstation in one command.
+#
+# Reads ./work.yml from the current project, opens your editor, and starts
+# (or attaches to) a tmux session via smug. If there's no work.yml, prompts
+# to bootstrap one via the /create-work-yml Claude Code skill.
+#
+# Install: copy this file to a directory on PATH (e.g. ~/.local/bin/work)
+#          and make it executable: chmod +x ~/.local/bin/work
+#
+# Dependencies: tmux, smug (https://github.com/ivaaaan/smug), claude (optional,
+# only required when bootstrapping a new work.yml).
+#
+# Editor: defaults to `codium`. Override with `WORK_EDITOR=code work` etc.
+
+set -euo pipefail
+
+CONFIG_FILE="work.yml"
+EDITOR_CMD="${WORK_EDITOR:-codium}"
+SKILL_NAME="/create-work-yml"
+
+c_red()  { printf '\033[31m%s\033[0m\n' "$*"; }
+c_cyan() { printf '\033[36m%s\033[0m\n' "$*"; }
+c_dim()  { printf '\033[2m%s\033[0m\n'  "$*"; }
+
+err()  { c_red  "$*" >&2; }
+info() { c_cyan "$*"; }
+note() { c_dim  "$*"; }
+
+# --- dependency checks --------------------------------------------------------
+for cmd in tmux smug; do
+  command -v "$cmd" >/dev/null 2>&1 \
+    || { err "missing dependency: $cmd (try: brew install $cmd)"; exit 1; }
+done
+
+# --- bootstrap path: no work.yml ----------------------------------------------
+if [[ ! -f "$CONFIG_FILE" ]]; then
+  printf 'No %s here in %s\n' "$CONFIG_FILE" "$PWD"
+  printf 'Set one up with the %s skill? [Y/n] ' "$SKILL_NAME"
+
+  reply=""
+  if [[ -t 0 ]]; then
+    read -r reply
+  fi
+
+  case "${reply:-y}" in
+    [Yy]*|"")
+      command -v claude >/dev/null 2>&1 \
+        || { err "claude CLI not found — install Claude Code first."; exit 1; }
+      info "Launching Claude Code with $SKILL_NAME…"
+      exec claude "$SKILL_NAME"
+      ;;
+    *)
+      note "Skipped. Run 'work' again once a $CONFIG_FILE exists here."
+      exit 0
+      ;;
+  esac
+fi
+
+# --- editor (best-effort, non-blocking) ---------------------------------------
+if command -v "$EDITOR_CMD" >/dev/null 2>&1; then
+  "$EDITOR_CMD" . >/dev/null 2>&1 &
+  disown 2>/dev/null || true
+else
+  err "warn: editor '$EDITOR_CMD' not on PATH; skipping (set WORK_EDITOR to override)"
+fi
+
+# --- tmux session via smug ----------------------------------------------------
+# smug's `start -f` reads the given file. If the session named in the file is
+# already running, smug attaches/switches to it instead of starting fresh.
+exec smug start -f "$CONFIG_FILE" --attach

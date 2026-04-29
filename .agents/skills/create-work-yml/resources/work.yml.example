@@ -1,0 +1,43 @@
+# Example smug config consumed by the `work` script.
+# Save as ./work.yml at your project root.
+#
+# This example mirrors a pnpm + turborepo monorepo with a docker-compose
+# postgres, a Next.js admin UI, a Cloudflare Worker API, a Shopify app, and
+# a Shopify theme — adjust to your project's actual layout.
+
+# tmux session name. Keep it short and unique per repo.
+session: shopify
+
+# Absolute path. The work script invokes `smug start -f ./work.yml`, so
+# smug runs `cd <root>` before every pane.
+root: /Users/levi/dev/shopify
+
+# Run once before any windows/panes are created. Blocks pane startup, so
+# keep these fast and idempotent.
+on_project_start:
+  - pnpm docker:up
+
+windows:
+  - name: dev
+    layout: tiled
+    # The first dev server uses the window's initial pane via window-level
+    # `commands`. Subsequent panes go in the `panes` array. (Smug always
+    # creates one starter pane per window — using `commands` here puts it
+    # to work instead of leaving an empty shell.)
+    commands:
+      - cd apps/promo-admin
+      - pnpm dev
+    panes:
+      - commands:
+          - cd apps/promo-api
+          - pnpm dev
+      - commands:
+          - cd apps/shopify-app
+          - pnpm dev
+      - commands:
+          - cd apps/theme
+          - pnpm dev
+
+# Optional: stop hooks run when you `smug stop`.
+# on_project_stop:
+#   - pnpm docker:down
