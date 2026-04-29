@@ -145,13 +145,17 @@ Prefix is `Ctrl-b`. Custom bindings live in `~/.tmux.conf`. Reload after edits w
 
 | Keys | Action |
 |---|---|
-| `prefix c` | New window (inherits cwd) |
-| `prefix n` / `p` | Next / previous window |
+| `prefix n` | New window (inherits cwd) — was `next-window` by default |
+| `prefix a` | Previous window |
+| `prefix b` | Next window — was `send-prefix` by default |
 | `prefix 0`..`9` | Jump to window by number |
 | `prefix ,` | Rename current window |
 | `prefix w` | Window picker |
-| `prefix Tab` | Last-used window (was `prefix l` by default; remapped because `l` is now pane-right) |
+| `prefix Tab` | Last-used window — was `prefix l` by default |
 | `prefix &` | Kill current window (confirms) |
+| `prefix C-b` | Send literal prefix to nested app (relocated from `prefix b`) |
+
+`prefix c` and `prefix p` are intentionally **unbound** so muscle memory points at the new layout.
 
 #### Sessions
 
