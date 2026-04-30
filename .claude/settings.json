@@ -12,11 +12,6 @@
       }
     ]
   },
-  "statusLine": {
-    "type": "command",
-    "command": "bunx -y ccstatusline@latest",
-    "padding": 0
-  },
   "enabledPlugins": {
     "cloudflare@claude-plugins-official": true,
     "chrome-devtools-mcp@claude-plugins-official": true,
@@ -28,5 +23,9 @@
     "mode": "hold"
   },
   "skipDangerousModePermissionPrompt": true,
-  "voiceEnabled": true
+  "voiceEnabled": true,
+  "statusLine": {
+    "type": "command",
+    "command": "bash ~/.claude/statusline-command.sh"
+  }
 }

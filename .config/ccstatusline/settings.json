@@ -3,24 +3,19 @@
   "lines": [
     [
       {
-        "id": "1",
-        "type": "model",
-        "color": "brightWhite"
+        "id": "3",
+        "type": "tokens-total",
+        "color": "yellow"
       },
       {
-        "id": "3",
-        "type": "context-percentage-usable",
-        "color": "brightCyan"
+        "id": "8af13d61-38b4-4e68-9ab7-9e3f866a84d6",
+        "type": "context-percentage",
+        "color": "brightWhite"
       },
       {
         "id": "5",
         "type": "git-branch",
-        "color": "brightMagenta"
-      },
-      {
-        "id": "7",
-        "type": "git-changes",
-        "color": "brightYellow"
+        "color": ""
       }
     ],
     [],
@@ -29,6 +24,8 @@
   "flexMode": "full-minus-40",
   "compactThreshold": 60,
   "colorLevel": 2,
+  "defaultSeparator": "-",
+  "defaultPadding": "",
   "inheritSeparatorColors": false,
   "globalBold": false,
   "minimalistMode": true,
@@ -44,7 +41,5 @@
     "endCaps": [],
     "autoAlign": false,
     "continueThemeAcrossLines": false
-  },
-  "defaultPadding": "",
-  "defaultSeparator": "-"
+  }
 }
