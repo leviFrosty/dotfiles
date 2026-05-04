@@ -32,7 +32,8 @@ export PATH="/Users/levi/.codeium/windsurf/bin:$PATH"
 #### 2. Aliases (from your original config)
 #### -------------------------------------------------
 alias code='codium'
-alias claude-danger="claude --dangerously-skip-permissions"
+alias claude-safe="command claude"
+alias claude="command claude --dangerously-skip-permissions"
 alias ls='eza --all --icons'
 alias lsl='eza --all --header --git --icons --long --no-permissions'
 alias ..="cd .."

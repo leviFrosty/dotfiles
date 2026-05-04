@@ -119,6 +119,21 @@ dotfiles add ~/.local/bin/work
 
 so the launcher syncs to other machines.
 
+### 9. Ignore work.yml via the user's global gitignore
+
+`work.yml` is a per-developer workstation config — it shouldn't be committed and shouldn't pollute the project's `.gitignore` (other contributors don't use `work`). Use the user's global excludes file instead:
+
+1. If the project isn't a git repo (no `.git` directory), skip this step silently.
+2. Run `git check-ignore work.yml` from the project root. Exit 0 → already ignored, you're done.
+3. Otherwise, resolve the global excludes file path in this order:
+   - `git config --global --get core.excludesFile` (expand `~`)
+   - else `${XDG_CONFIG_HOME:-$HOME/.config}/git/ignore` (Git's default on macOS/Linux)
+4. If the resolved file doesn't exist, create it (and parent dirs) — but do NOT set `core.excludesFile` yourself if it wasn't already set; the default path works without config.
+5. If `work.yml` isn't already a line in that file, append it (with a trailing newline). Leave existing entries untouched.
+6. Re-run `git check-ignore work.yml` to confirm. If it still doesn't match, tell the user — something unusual is going on (e.g. the project's `.gitignore` has a `!work.yml` re-include) and let them resolve it.
+
+Never touch the project's `.gitignore` for this — that defeats the point of using a global file.
+
 ## Things to avoid
 
 - Don't invent dev scripts that don't exist in the project. If you can't find a real `scripts.dev` or equivalent, say so and ask.
@@ -130,5 +145,6 @@ so the launcher syncs to other machines.
 ## Success criteria
 
 - `work.yml` exists at the project root.
+- `work.yml` is ignored via the user's global gitignore (not the project's `.gitignore`) so it won't be committed.
 - `work` is on PATH.
 - Running `work` from the project root launches the editor and a tmux session with the user's expected panes, each running the right dev process.

@@ -47,7 +47,7 @@ if [[ ! -f "$CONFIG_FILE" ]]; then
     [Yy]*|"")
       command -v claude >/dev/null 2>&1 \
         || { err "claude CLI not found — install Claude Code first."; exit 1; }
-      info "Launching Claude Code with $SKILL_NAME…"
+      info "Launching Claude Code with ${SKILL_NAME}…"
       exec claude "$SKILL_NAME"
       ;;
     *)
