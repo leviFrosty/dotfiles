@@ -118,3 +118,10 @@ case ":$PATH:" in
 esac
 # pnpm end
 export PATH=$PATH:$HOME/.maestro/bin
+
+# fzf (key bindings: Ctrl+T files, Ctrl+R history, Alt+C cd; + completion)
+# Use fd so fzf respects .gitignore (skips node_modules etc.); --hidden keeps dotfiles
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --exclude .git'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_ALT_C_COMMAND='fd --type d --hidden --exclude .git'
+eval "$(fzf --zsh)"
