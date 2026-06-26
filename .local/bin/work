@@ -66,6 +66,40 @@ else
 fi
 
 # --- tmux session via smug ----------------------------------------------------
-# smug's `start -f` reads the given file. If the session named in the file is
-# already running, smug attaches/switches to it instead of starting fresh.
-exec smug start -f "$CONFIG_FILE" --attach
+# Outside tmux: create (or attach to) the project session normally.
+if [[ -z "${TMUX:-}" ]]; then
+  exec smug start -f "$CONFIG_FILE" --attach
+fi
+
+# Already inside tmux. Don't nest a separate session and don't just bolt a
+# project window onto the side — take over the window you ran `work` from:
+#   1. Build the project's windows in THIS session (smug's --inside-current-
+#      -session), noting which windows are new.
+#   2. Fold THIS pane — your shell, with its scrollback — into the project's
+#      main window as a scratch pane.
+#   3. Switch to that window; the window you came from empties out and tmux
+#      drops it. Nothing is lost: you land in the work window, at your shell.
+#
+# Note: smug only runs `on_project_start` (editor/browser launches) on the
+# interactive attach path, which we're deliberately not taking here — so put
+# anything that MUST open inside tmux into a window/pane command, not
+# on_project_start. (This script launches the editor itself, above.)
+origin_pane="$(tmux display-message -p '#{pane_id}')"
+windows_before="$(tmux list-windows -F '#{window_id}')"
+
+smug start -f "$CONFIG_FILE" --inside-current-session
+
+# The first window smug added (work.yml's first window) is the one we fold into.
+work_window=""
+while IFS= read -r w; do
+  grep -qxF "$w" <<<"$windows_before" || { work_window="$w"; break; }
+done < <(tmux list-windows -F '#{window_id}')
+
+if [[ -z "$work_window" ]]; then
+  note "No new project window appeared — leaving your layout untouched."
+  exit 0
+fi
+
+tmux join-pane -s "$origin_pane" -t "$work_window"
+tmux select-layout -t "$work_window" tiled
+tmux select-window -t "$work_window"

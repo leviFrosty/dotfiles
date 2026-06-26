@@ -32,6 +32,7 @@ export PATH="/Users/levi/.codeium/windsurf/bin:$PATH"
 #### 2. Aliases (from your original config)
 #### -------------------------------------------------
 alias code='codium'
+alias oc="opencode"
 alias claude-safe="command claude"
 alias claude="command claude --dangerously-skip-permissions"
 alias ls='eza --all --icons'
@@ -125,3 +126,11 @@ export FZF_DEFAULT_COMMAND='fd --type f --hidden --exclude .git'
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 export FZF_ALT_C_COMMAND='fd --type d --hidden --exclude .git'
 eval "$(fzf --zsh)"
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/levi/.lmstudio/bin"
+# End of LM Studio CLI section
+
+
+# sentry
+fpath=("/Users/levi/.local/share/zsh/site-functions" $fpath)

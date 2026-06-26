@@ -235,6 +235,25 @@
   },
   "claudeCode.useTerminal": true,
   "terminal.integrated.tabs.title": "${sequence}",
-  "terminal.integrated.tabs.description": "",
   "terminal.integrated.tabs.location": "left",
+  "terminal.integrated.enablePersistentSessions": true,
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+  },
+  "terminal.integrated.fontLigatures.enabled": true,
+  "terminal.integrated.persistentSessionReviveProcess": "onExitAndWindowClose",
+  "json.schemaDownload.trustedDomains": {
+    "https://developer.microsoft.com/json-schemas/": true,
+    "https://json-schema.org/": true,
+    "https://json.schemastore.org/": true,
+    "https://models.dev": true,
+    "https://opencode.ai": true,
+    "https://raw.githubusercontent.com/devcontainers/spec/": true,
+    "https://raw.githubusercontent.com/microsoft/vscode/": true,
+    "https://schemastore.azurewebsites.net/": true,
+    "https://www.schemastore.org/": true,
+  },
+  "[mdx]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+  },
 }

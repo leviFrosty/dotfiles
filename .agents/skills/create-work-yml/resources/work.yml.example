@@ -12,10 +12,34 @@ session: shopify
 # smug runs `cd <root>` before every pane.
 root: /Users/levi/dev/shopify
 
-# Run once before any windows/panes are created. Blocks pane startup, so
-# keep these fast and idempotent.
+# Run once before any windows/panes are created. Use this for:
+#   - Preconditions (docker up, migrations, seeds) — must be idempotent and fast.
+#   - Launching GUI apps you want open alongside the tmux session: editor,
+#     browser tabs, design tool, chat app, API client, etc. Trail them with
+#     `&` so they don't block pane startup.
+#
+# Pick the launch commands that match your OS / setup — there's no default.
+# Examples below are commented out; uncomment/replace as needed.
 on_project_start:
   - pnpm docker:up
+  # --- editor (pick one or none) -----------------------------------------
+  # - codium . &
+  # - code . &
+  # - cursor . &
+  # - zed . &
+  # - subl . &
+  # - idea . &
+  # macOS: open the project folder in your default editor
+  # - open -a "Visual Studio Code" . &
+  # --- browser tabs (macOS examples; adapt for your OS) ------------------
+  # - open -a "Google Chrome" --args --new-window http://localhost:3000 &
+  # - open -na "Google Chrome" --args --new-window http://localhost:8787/admin &
+  # Linux:
+  # - google-chrome --new-window http://localhost:3000 &
+  # - firefox --new-window http://localhost:3000 &
+  # --- other helpers -----------------------------------------------------
+  # - open -a "TablePlus" mysql://localhost:3306 &
+  # - open -a "Slack" &
 
 windows:
   - name: dev

@@ -12,20 +12,23 @@
       }
     ]
   },
-  "enabledPlugins": {
-    "cloudflare@claude-plugins-official": true,
-    "chrome-devtools-mcp@claude-plugins-official": true,
-    "swift-lsp@claude-plugins-official": true
+  "statusLine": {
+    "type": "command",
+    "command": "bash ~/.claude/statusline-command.sh"
   },
-  "effortLevel": "xhigh",
+  "enabledPlugins": {
+    "chrome-devtools-mcp@claude-plugins-official": false,
+    "swift-lsp@claude-plugins-official": true,
+    "playwright@claude-plugins-official": true
+  },
+  "effortLevel": "medium",
+  "tui": "fullscreen",
   "voice": {
     "enabled": true,
     "mode": "hold"
   },
   "skipDangerousModePermissionPrompt": true,
+  "theme": "custom:one-dark",
   "voiceEnabled": true,
-  "statusLine": {
-    "type": "command",
-    "command": "bash ~/.claude/statusline-command.sh"
-  }
+  "shiftEnterKeyBindingInstalled": true
 }

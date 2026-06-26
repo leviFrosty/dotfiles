@@ -185,6 +185,10 @@ if.app-id = 'com.apple.iphonesimulator'
 run = "move-node-to-workspace ide"
 
 [[on-window-detected]]
+if.app-id = 'dev.zed.Zed'
+run = "move-node-to-workspace ide"
+
+[[on-window-detected]]
 if.app-id = 'com.vscodium'
 run = "move-node-to-workspace ide"
 

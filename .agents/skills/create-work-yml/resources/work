@@ -1,22 +1,27 @@
 #!/usr/bin/env bash
 # work — open your project workstation in one command.
 #
-# Reads ./work.yml from the current project, opens your editor, and starts
-# (or attaches to) a tmux session via smug. If there's no work.yml, prompts
-# to bootstrap one via the /create-work-yml Claude Code skill.
+# Reads ./work.yml from the current project and starts (or attaches to) a
+# tmux session via smug. Any GUI apps you want auto-launched (editor,
+# browser, design tools, etc.) live in work.yml's `on_project_start` —
+# this script makes no assumptions about your editor or window manager.
 #
-# Install: copy this file to a directory on PATH (e.g. ~/.local/bin/work)
-#          and make it executable: chmod +x ~/.local/bin/work
+# If there's no work.yml, prompts to bootstrap one via the
+# /create-work-yml Claude Code skill.
+#
+# Install: copy this file to any directory on your PATH and make it
+#          executable. Examples:
+#            install -m 0755 work ~/.local/bin/work
+#            install -m 0755 work ~/bin/work
+#            install -m 0755 work /usr/local/bin/work     # may need sudo
+#          Pick whichever fits your setup; the script doesn't care.
 #
 # Dependencies: tmux, smug (https://github.com/ivaaaan/smug), claude (optional,
 # only required when bootstrapping a new work.yml).
-#
-# Editor: defaults to `codium`. Override with `WORK_EDITOR=code work` etc.
 
 set -euo pipefail
 
 CONFIG_FILE="work.yml"
-EDITOR_CMD="${WORK_EDITOR:-codium}"
 SKILL_NAME="/create-work-yml"
 
 c_red()  { printf '\033[31m%s\033[0m\n' "$*"; }
@@ -30,7 +35,7 @@ note() { c_dim  "$*"; }
 # --- dependency checks --------------------------------------------------------
 for cmd in tmux smug; do
   command -v "$cmd" >/dev/null 2>&1 \
-    || { err "missing dependency: $cmd (try: brew install $cmd)"; exit 1; }
+    || { err "missing dependency: $cmd (install via your package manager, e.g. 'brew install $cmd' on macOS)"; exit 1; }
 done
 
 # --- bootstrap path: no work.yml ----------------------------------------------
@@ -57,15 +62,42 @@ if [[ ! -f "$CONFIG_FILE" ]]; then
   esac
 fi
 
-# --- editor (best-effort, non-blocking) ---------------------------------------
-if command -v "$EDITOR_CMD" >/dev/null 2>&1; then
-  "$EDITOR_CMD" . >/dev/null 2>&1 &
-  disown 2>/dev/null || true
-else
-  err "warn: editor '$EDITOR_CMD' not on PATH; skipping (set WORK_EDITOR to override)"
+# --- tmux session via smug ----------------------------------------------------
+# Outside tmux: create (or attach to) the project session normally. smug runs
+# the work.yml `on_project_start:` list (editor, browser, etc.) on this path.
+if [[ -z "${TMUX:-}" ]]; then
+  exec smug start -f "$CONFIG_FILE" --attach
 fi
 
-# --- tmux session via smug ----------------------------------------------------
-# smug's `start -f` reads the given file. If the session named in the file is
-# already running, smug attaches/switches to it instead of starting fresh.
-exec smug start -f "$CONFIG_FILE" --attach
+# Already inside tmux. Don't nest a separate session and don't just bolt a
+# project window onto the side — take over the window you ran `work` from:
+#   1. Build the project's windows in THIS session (smug's --inside-current-
+#      -session), noting which windows are new.
+#   2. Fold THIS pane — your shell, with its scrollback — into the project's
+#      main window as a scratch pane.
+#   3. Switch to that window; the window you came from empties out and tmux
+#      drops it. Nothing is lost: you land in the work window, at your shell.
+#
+# Note: smug only runs `on_project_start` on the interactive attach path above,
+# NOT with --inside-current-session. So GUI apps in on_project_start won't open
+# when you run `work` from inside tmux. If you need something to open in both
+# cases, launch it from a window/pane command instead of on_project_start.
+origin_pane="$(tmux display-message -p '#{pane_id}')"
+windows_before="$(tmux list-windows -F '#{window_id}')"
+
+smug start -f "$CONFIG_FILE" --inside-current-session
+
+# The first window smug added (work.yml's first window) is the one we fold into.
+work_window=""
+while IFS= read -r w; do
+  grep -qxF "$w" <<<"$windows_before" || { work_window="$w"; break; }
+done < <(tmux list-windows -F '#{window_id}')
+
+if [[ -z "$work_window" ]]; then
+  note "No new project window appeared — leaving your layout untouched."
+  exit 0
+fi
+
+tmux join-pane -s "$origin_pane" -t "$work_window"
+tmux select-layout -t "$work_window" tiled
+tmux select-window -t "$work_window"
