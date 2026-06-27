@@ -2,7 +2,6 @@
   "name": "pi-extensions",
   "private": true,
   "dependencies": {
-    "@mrclrchtr/supi-context": "^1.16.1",
     "pi-web-access": "^0.13.0"
   }
 }

@@ -102,7 +102,10 @@
   "editor.minimap.enabled": false,
   "workbench.colorTheme": "One Dark Pro",
   "terminal.integrated.fontSize": 15,
+  "terminal.integrated.minimumContrastRatio": 1,
   "workbench.colorCustomizations": {
+    "terminal.background": "#21252B",
+    "terminal.foreground": "#c4c9d2",
     "editorOverviewRuler.border": "#0000",
     "editorOverviewRuler.findMatchForeground": "#f6ff0065",
     "editorOverviewRuler.rangeHighlightForeground": "#0000",

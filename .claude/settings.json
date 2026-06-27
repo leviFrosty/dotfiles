@@ -21,7 +21,7 @@
     "swift-lsp@claude-plugins-official": true,
     "playwright@claude-plugins-official": true
   },
-  "effortLevel": "medium",
+  "effortLevel": "xhigh",
   "tui": "fullscreen",
   "voice": {
     "enabled": true,

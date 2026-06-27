@@ -1,8 +1,8 @@
 {
   "lastChangelogVersion": "0.80.2",
-  "defaultProvider": "lm-studio",
-  "defaultModel": "qwen/qwen3.6-35b-a3b",
-  "defaultThinkingLevel": "high",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.5",
+  "defaultThinkingLevel": "medium",
   "hideThinkingBlock": true,
   "compaction": {
     "enabled": true
@@ -10,11 +10,22 @@
   "enableInstallTelemetry": false,
   "theme": "one-dark-pro",
   "packages": [
-    "npm:pi-web-access",
-    "npm:@mrclrchtr/supi-context"
+    "npm:pi-web-access"
   ],
   "enabledModels": [
     "openai-codex/gpt-5.5",
     "lm-studio/qwen/qwen3.6-35b-a3b"
-  ]
+  ],
+  "enableSkillCommands": true,
+  "editorPaddingX": 0,
+  "autocompleteMaxVisible": 7,
+  "terminal": {
+    "showTerminalProgress": true
+  },
+  "steeringMode": "one-at-a-time",
+  "defaultProjectTrust": "ask",
+  "doubleEscapeAction": "tree",
+  "treeFilterMode": "default",
+  "quietStartup": true,
+  "showAsciiMotd": false
 }

@@ -1,0 +1,155 @@
+import type {
+  BuildSystemPromptOptions,
+  ExtensionContext,
+  Skill,
+} from "@earendil-works/pi-coding-agent";
+
+function unescapeXml(text: string): string {
+  return text
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, "&");
+}
+
+function isLikelyContextFileHeading(value: string): boolean {
+  return (
+    value.includes("/") ||
+    value.includes("\\") ||
+    value.startsWith("~") ||
+    /(?:^|\b)(?:AGENTS|CLAUDE|SYSTEM|APPEND_SYSTEM)\.md$/i.test(value)
+  );
+}
+
+function deriveSkills(systemPrompt: string): Skill[] {
+  const skills: Skill[] = [];
+  const skillRegex =
+    /<skill>\s*<name>([\s\S]*?)<\/name>\s*<description>([\s\S]*?)<\/description>\s*<location>([\s\S]*?)<\/location>\s*<\/skill>/g;
+
+  for (const match of systemPrompt.matchAll(skillRegex)) {
+    skills.push({
+      name: unescapeXml(match[1].trim()),
+      description: unescapeXml(match[2].trim()),
+      filePath: unescapeXml(match[3].trim()),
+    } as Skill);
+  }
+
+  return skills;
+}
+
+function sliceProjectContextSection(systemPrompt: string): string | null {
+  const sectionMarker = "\n\n# Project Context\n\n";
+  const projectContextStart = systemPrompt.indexOf(sectionMarker);
+  if (projectContextStart < 0) {
+    return null;
+  }
+
+  let projectContext = systemPrompt.slice(projectContextStart + sectionMarker.length);
+  const intro = "Project-specific instructions and guidelines:\n\n";
+  if (projectContext.startsWith(intro)) {
+    projectContext = projectContext.slice(intro.length);
+  }
+
+  const skillsMarker =
+    "\n\nThe following skills provide specialized instructions for specific tasks.";
+  const skillsIndex = projectContext.indexOf(skillsMarker);
+  if (skillsIndex >= 0) {
+    projectContext = projectContext.slice(0, skillsIndex);
+  }
+
+  const dateIndex = projectContext.indexOf("\nCurrent date: ");
+  if (dateIndex >= 0) {
+    projectContext = projectContext.slice(0, dateIndex);
+  }
+
+  return projectContext;
+}
+
+function deriveContextFiles(systemPrompt: string): Array<{ path: string; content: string }> {
+  const projectContext = sliceProjectContextSection(systemPrompt);
+  if (!projectContext) {
+    return [];
+  }
+
+  const contextFiles: Array<{ path: string; content: string }> = [];
+  const headingRegex = /^##\s+(.+)$/gm;
+
+  let match = headingRegex.exec(projectContext);
+  while (match !== null) {
+    const filePath = match[1].trim();
+    const contentStart = match.index + match[0].length;
+
+    const nextMatch = headingRegex.exec(projectContext);
+    const contentEnd = nextMatch ? nextMatch.index : projectContext.length;
+
+    let content = projectContext.slice(contentStart, contentEnd);
+    if (content.startsWith("\n\n")) {
+      content = content.slice(2);
+    }
+    if (content.endsWith("\n\n")) {
+      content = content.slice(0, -2);
+    }
+
+    if (isLikelyContextFileHeading(filePath)) {
+      contextFiles.push({ path: filePath, content });
+    }
+
+    match = nextMatch;
+  }
+
+  return contextFiles;
+}
+
+export function extractGuidelinesSection(systemPrompt: string): string | null {
+  const marker = "\nGuidelines:\n";
+  const start = systemPrompt.indexOf(marker);
+  if (start < 0) {
+    return null;
+  }
+
+  const afterStart = start + marker.length;
+  const endMarkers = ["\n\nPi documentation", "\n\n# Project Context", "\nCurrent date: "];
+  let end = systemPrompt.length;
+  for (const endMarker of endMarkers) {
+    const index = systemPrompt.indexOf(endMarker, afterStart);
+    if (index >= 0) {
+      end = Math.min(end, index);
+    }
+  }
+
+  const section = systemPrompt.slice(afterStart, end).trim();
+  return section.length > 0 ? section : null;
+}
+
+export function deriveOptionsFromSystemPrompt(
+  ctx: ExtensionContext,
+  cachedOptions: BuildSystemPromptOptions | undefined,
+): BuildSystemPromptOptions | undefined {
+  const systemPrompt = ctx.getSystemPrompt();
+  const derivedFiles = deriveContextFiles(systemPrompt);
+  const derivedSkills = deriveSkills(systemPrompt);
+
+  if (cachedOptions) {
+    const hasFiles = cachedOptions.contextFiles && cachedOptions.contextFiles.length > 0;
+    const hasSkills = cachedOptions.skills && cachedOptions.skills.length > 0;
+    if (hasFiles && hasSkills) {
+      return cachedOptions;
+    }
+    return {
+      ...cachedOptions,
+      contextFiles: hasFiles ? cachedOptions.contextFiles : derivedFiles,
+      skills: hasSkills ? cachedOptions.skills : derivedSkills,
+    };
+  }
+
+  if (derivedFiles.length === 0 && derivedSkills.length === 0) {
+    return undefined;
+  }
+
+  return {
+    cwd: ctx.cwd,
+    contextFiles: derivedFiles,
+    skills: derivedSkills,
+  };
+}

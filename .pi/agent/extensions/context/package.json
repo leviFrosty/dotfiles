@@ -1,0 +1,7 @@
+{
+  "name": "pi-context-extension-local",
+  "private": true,
+  "dependencies": {
+    "@mrclrchtr/supi-core": "1.16.1"
+  }
+}

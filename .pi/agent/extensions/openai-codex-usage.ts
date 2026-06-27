@@ -102,7 +102,18 @@ function selectRateLimitBucket(payload: Record<string, unknown>, modelId: string
 function formatSnapshot(snapshot: Pick<UsageSnapshot, "primary" | "secondary">): string {
   return [snapshot.primary, snapshot.secondary]
     .filter(Boolean)
-    .map((window) => `${window!.label} ${Math.round(window!.usedPercent)}%`)
+    .map((window) => {
+      const pct = `${Math.round(window!.usedPercent)}%`;
+      if (!window?.resetAt) return `${window!.label} ${pct}`;
+      const resetDate = new Date(window.resetAt * 1000);
+      const time = resetDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: true });
+      const isSecondary = window === snapshot.secondary;
+      if (isSecondary) {
+        const monthDay = resetDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        return `${window!.label} ${pct} resets ${monthDay} at ${time}`;
+      }
+      return `${window!.label} ${pct} resets ${time}`;
+    })
     .join(", ");
 }
 
