@@ -1,0 +1,7 @@
+# Local Pi auth/session/cache state
+agent/auth.json
+agent/sessions/
+context-mode/
+
+# Installed package contents are restored from package.json/package-lock.json
+agent/npm/node_modules/

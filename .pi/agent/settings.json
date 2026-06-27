@@ -1,0 +1,22 @@
+{
+  "lastChangelogVersion": "0.80.2",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.5",
+  "defaultThinkingLevel": "medium",
+  "hideThinkingBlock": true,
+  "compaction": {
+    "enabled": true
+  },
+  "enableInstallTelemetry": false,
+  "theme": "one-dark-pro",
+  "packages": [
+    "npm:context-mode",
+    "npm:pi-web-access",
+    "npm:@hypabolic/pi-hypa",
+    "npm:@mrclrchtr/supi-context"
+  ],
+  "enabledModels": [
+    "openai-codex/gpt-5.5",
+    "lm-studio/qwen/qwen3.6-35b-a3b"
+  ]
+}
