@@ -1,0 +1,49 @@
+# delta themes — included from ~/.gitconfig
+# Activate with:  [delta] features = one-dark-pro
+#
+# "One Dark Pro" — palette mirrors the VS Code theme of the same name.
+# bg #282c34  fg #abb2bf  red #e06c75  green #98c379  blue #61afef
+# purple #c678dd  cyan #56b6c2  orange #d19a66  comment #5c6370  gutter #3e4451
+
+[delta "one-dark-pro"]
+	dark = true
+	# TwoDark is bat/delta's One Dark syntax theme (Atom One Dark lineage).
+	syntax-theme = TwoDark
+	line-numbers = true
+
+	# File header
+	file-style = "#61afef" bold
+	file-decoration-style = "#3e4451" ul
+	file-added-label = [+]
+	file-copied-label = [C]
+	file-modified-label = [M]
+	file-removed-label = [-]
+	file-renamed-label = [R]
+
+	# Hunk header
+	hunk-header-style = "#5c6370" italic
+	hunk-header-decoration-style = "#3e4451" box ul
+	hunk-header-line-number-style = "#c678dd" bold
+	hunk-header-file-style = "#61afef"
+
+	# Removed / added lines (subtle bg, brighter emph on the changed span)
+	minus-style = syntax "#37252c"
+	minus-emph-style = syntax "#6f3742"
+	minus-non-emph-style = syntax "#37252c"
+	plus-style = syntax "#22342a"
+	plus-emph-style = syntax "#36603f"
+	plus-non-emph-style = syntax "#22342a"
+	zero-style = syntax
+
+	# Line numbers
+	line-numbers-minus-style = "#e06c75"
+	line-numbers-plus-style = "#98c379"
+	line-numbers-zero-style = "#5c6370"
+	line-numbers-left-style = "#3e4451"
+	line-numbers-right-style = "#3e4451"
+	line-numbers-left-format = "{nm:>4}┊"
+	line-numbers-right-format = "{np:>4}│"
+
+	# Misc
+	whitespace-error-style = "#e06c75" reverse
+	blame-palette = "#282c34" "#2c313c" "#353b45" "#3e4451"
