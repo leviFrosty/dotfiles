@@ -1,8 +1,8 @@
 {
-  "lastChangelogVersion": "0.80.2",
+  "lastChangelogVersion": "0.80.6",
   "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.5",
-  "defaultThinkingLevel": "medium",
+  "defaultModel": "gpt-5.6-sol",
+  "defaultThinkingLevel": "low",
   "hideThinkingBlock": true,
   "compaction": {
     "enabled": true
@@ -10,11 +10,13 @@
   "enableInstallTelemetry": false,
   "theme": "one-dark-pro",
   "packages": [
-    "npm:pi-web-access"
+    "npm:pi-web-access",
+    "npm:@tintinweb/pi-subagents"
   ],
   "enabledModels": [
-    "openai-codex/gpt-5.5",
-    "lm-studio/qwen/qwen3.6-35b-a3b"
+    "openai-codex/gpt-5.6-sol",
+    "openai-codex/gpt-5.6-luna",
+    "openai-codex/gpt-5.6-terra"
   ],
   "enableSkillCommands": true,
   "editorPaddingX": 0,
@@ -26,6 +28,6 @@
   "defaultProjectTrust": "ask",
   "doubleEscapeAction": "tree",
   "treeFilterMode": "default",
-  "quietStartup": true,
+  "quietStartup": false,
   "showAsciiMotd": false
 }

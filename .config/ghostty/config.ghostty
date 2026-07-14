@@ -1,0 +1,41 @@
+# Converted from ~/.wezterm.lua
+
+# my coolnight colorscheme
+foreground = #CBE0F0
+background = #011423
+cursor-color = #47FF9C
+cursor-text = #011423
+cursor-style = block
+cursor-style-blink = false
+selection-background = #033259
+selection-foreground = #CBE0F0
+
+# ANSI colors (0-7)
+palette = 0=#214969
+palette = 1=#E52E2E
+palette = 2=#44FFB1
+palette = 3=#FFE073
+palette = 4=#0FC5ED
+palette = 5=#A277FF
+palette = 6=#24EAF7
+palette = 7=#24EAF7
+
+# Bright ANSI colors (8-15)
+palette = 8=#214969
+palette = 9=#E52E2E
+palette = 10=#44FFB1
+palette = 11=#FFE073
+palette = 12=#A277FF
+palette = 13=#A277FF
+palette = 14=#24EAF7
+palette = 15=#24EAF7
+
+font-family = JetBrainsMono Nerd Font Mono
+font-size = 16
+window-padding-y = 5
+
+# WezTerm's RESIZE decoration: keep the window resizable while hiding the titlebar.
+macos-titlebar-style = hidden
+
+background-opacity = 0.85
+background-blur = 10

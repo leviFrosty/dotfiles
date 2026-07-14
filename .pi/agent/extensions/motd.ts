@@ -71,8 +71,16 @@ function modelLabel(model: { id?: string } | undefined): string {
   return model?.id ? prettifyModelName(model.id) : "no model";
 }
 
+type LegacyMotdSettings = {
+  showAsciiMotd?: boolean;
+};
+
 function getShowAsciiMotd(ctx: ExtensionContext): boolean {
-  return SettingsManager.create(ctx.cwd, undefined, { projectTrusted: ctx.isProjectTrusted() }).getShowAsciiMotd();
+  const settings = SettingsManager.create(ctx.cwd, undefined, { projectTrusted: ctx.isProjectTrusted() });
+  const globalSettings = settings.getGlobalSettings() as LegacyMotdSettings;
+  const projectSettings = settings.getProjectSettings() as LegacyMotdSettings;
+
+  return projectSettings.showAsciiMotd ?? globalSettings.showAsciiMotd ?? true;
 }
 
 function renderMotd(theme: Theme, ctx: { cwd: string; model?: { id?: string } }, options: { showAsciiMotd?: boolean } = {}): string[] {

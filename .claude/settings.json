@@ -1,5 +1,6 @@
 {
   "includeCoAuthoredBy": false,
+  "model": "claude-fable-5[1m]",
   "hooks": {
     "Stop": [
       {
@@ -21,7 +22,7 @@
     "swift-lsp@claude-plugins-official": true,
     "playwright@claude-plugins-official": true
   },
-  "effortLevel": "xhigh",
+  "effortLevel": "low",
   "tui": "fullscreen",
   "voice": {
     "enabled": true,
@@ -29,6 +30,7 @@
   },
   "skipDangerousModePermissionPrompt": true,
   "theme": "custom:one-dark",
+  "editorMode": "normal",
   "voiceEnabled": true,
   "shiftEnterKeyBindingInstalled": true
 }

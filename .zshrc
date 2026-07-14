@@ -33,6 +33,7 @@ export PATH="/Users/levi/.codeium/windsurf/bin:$PATH"
 #### -------------------------------------------------
 alias code='codium'
 alias oc="opencode"
+alias term="ghostty"
 alias claude-safe="command claude"
 alias claude="command claude --dangerously-skip-permissions"
 alias ls='eza --all --icons'

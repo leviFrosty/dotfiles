@@ -48,6 +48,17 @@ const PREVIEW_PREFIX_WIDTH = SUMMARY_INDENT.length + PREVIEW_CONNECTOR.length; /
 // (we truncate them) instead of being wrapped by the inner Text component.
 const PREVIEW_RENDER_WIDTH = 4096;
 
+// Completed edit previews: show the edit tool's compact display diff below the
+// collapsed batch so successful code changes remain visible without expanding
+// every read/bash/node_modules-inspection tool in the run.
+const DIFF_MAX_LINES = 120;
+const DIFF_INDENT = "     ";
+
+// Skill reads are real read tool calls, but they deserve an explicit durable
+// transcript marker instead of disappearing into "read N files". Render each
+// detected skill read as its own line under the batch summary.
+const SKILL_LINE_PREFIX = SUMMARY_INDENT + PREVIEW_CONNECTOR;
+
 // ---------------------------------------------------------------------------
 // Module state
 // ---------------------------------------------------------------------------
@@ -123,6 +134,15 @@ function summarizeTools(tools: any[]): string {
 	return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
+function latestToolFailed(tools: any[]): boolean {
+	for (let i = tools.length - 1; i >= 0; i--) {
+		const tool = tools[i];
+		if (isToolPending(tool)) continue;
+		return isToolError(tool);
+	}
+	return false;
+}
+
 // Strip the escape sequences pi-tui emits — SGR colour/background runs (CSI
 // `...m` and other CSI codes) and OSC hyperlinks / prompt markers — so a line
 // that is only background-padding spaces collapses to "".
@@ -161,6 +181,175 @@ function previewLines(tool: any, max: number): string[] {
 		if (out.length >= max) break;
 	}
 	return out;
+}
+
+function stringArg(value: unknown): string | undefined {
+	return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
+function firstStringArg(args: any, keys: string[]): string | undefined {
+	for (const key of keys) {
+		const value = stringArg(args?.[key]);
+		if (value) return value;
+	}
+	return undefined;
+}
+
+function semanticPreviewLines(tool: any, max: number): string[] {
+	const args = tool?.args;
+	let text: string | undefined;
+	switch (tool?.toolName) {
+		case "bash":
+			text = firstStringArg(args, ["command"]);
+			break;
+		case "read":
+		case "edit":
+		case "write":
+		case "ls":
+			text = firstStringArg(args, ["path", "file_path", "dir", "directory"]);
+			break;
+		case "grep": {
+			const pattern = firstStringArg(args, ["pattern", "query"]);
+			const path = firstStringArg(args, ["path", "include"]);
+			text = [pattern, path].filter(Boolean).join(" — ") || undefined;
+			break;
+		}
+		case "find":
+			text = firstStringArg(args, ["path", "pattern", "name"]);
+			break;
+	}
+	if (!text) return previewLines(tool, max);
+	return text
+		.split("\n")
+		.map((line) => line.trimEnd())
+		.filter((line) => line.trim().length > 0)
+		.slice(0, max);
+}
+
+type EditDiffPreview = { path: string | undefined; diff: string };
+
+function collectEditDiffs(tools: any[]): EditDiffPreview[] {
+	const diffs: EditDiffPreview[] = [];
+	for (const tool of tools) {
+		if (tool?.toolName !== "edit" || isToolPending(tool) || isToolError(tool)) continue;
+		const diff = tool.result?.details?.diff;
+		if (typeof diff !== "string" || diff.trim().length === 0) continue;
+		diffs.push({ path: firstStringArg(tool.args, ["path", "file_path"]), diff });
+	}
+	return diffs;
+}
+
+function renderDiffLine(line: string): string {
+	const normalized = line.replace(/\t/g, "   ");
+	if (normalized.startsWith("+")) return fg("toolDiffAdded", normalized);
+	if (normalized.startsWith("-")) return fg("toolDiffRemoved", normalized);
+	return fg("toolDiffContext", normalized);
+}
+
+function appendEditDiffLines(lines: string[], diffs: EditDiffPreview[], width: number): void {
+	let remaining = DIFF_MAX_LINES;
+	let omitted = 0;
+	for (const diff of diffs) {
+		if (remaining <= 0) {
+			omitted += diff.diff.split("\n").filter((line) => line.length > 0).length + (diff.path ? 1 : 0);
+			continue;
+		}
+		if (diff.path) {
+			lines.push(truncateToWidth(fg("dim", `${SUMMARY_INDENT}${PREVIEW_CONNECTOR}${diff.path}`), width, "…"));
+			remaining--;
+		}
+		for (const raw of diff.diff.split("\n")) {
+			if (raw.length === 0) continue;
+			if (remaining <= 0) {
+				omitted++;
+				continue;
+			}
+			lines.push(truncateToWidth(`${DIFF_INDENT}${renderDiffLine(raw)}`, width, "…"));
+			remaining--;
+		}
+	}
+	if (omitted > 0) {
+		lines.push(truncateToWidth(fg("muted", `${DIFF_INDENT}… (${omitted} more diff lines)`), width, "…"));
+	}
+}
+
+type SkillInvocationPreview = { name: string; state: "pending" | "complete" | "error"; path: string | undefined };
+
+function normalizeSkillName(raw: string | undefined): string | undefined {
+	const cleaned = raw?.trim().replace(/^['"]|['"]$/g, "");
+	return cleaned && cleaned.length > 0 ? cleaned : undefined;
+}
+
+function normalizeToolPath(value: string | undefined): string | undefined {
+	const normalized = value?.replace(/^@/, "").replace(/\\/g, "/").replace(/\/+$/u, "").trim();
+	return normalized && normalized.length > 0 ? normalized : undefined;
+}
+
+function fileStem(fileName: string): string {
+	return fileName.replace(/\.[^.]*$/u, "");
+}
+
+function skillNameFromPath(pathValue: string | undefined): string | undefined {
+	const normalized = normalizeToolPath(pathValue);
+	if (!normalized) return undefined;
+	const parts = normalized.split("/").filter((part) => part.length > 0);
+	const last = parts[parts.length - 1];
+	if (!last) return undefined;
+
+	if (last.toLowerCase() === "skill.md" && parts.length >= 2) {
+		return normalizeSkillName(parts[parts.length - 2]);
+	}
+
+	// Pi also supports single-file skills in */skills/name.md.
+	if (/\.md$/iu.test(last) && parts.includes("skills")) {
+		return normalizeSkillName(fileStem(last));
+	}
+
+	return undefined;
+}
+
+function textFromToolResult(tool: any): string | undefined {
+	const content = tool?.result?.content;
+	if (!Array.isArray(content)) return undefined;
+	const text = content
+		.map((block: any) => (block?.type === "text" && typeof block.text === "string" ? block.text : ""))
+		.filter((part: string) => part.length > 0)
+		.join("\n");
+	return text.length > 0 ? text : undefined;
+}
+
+function skillNameFromMarkdown(content: string | undefined): string | undefined {
+	if (!content) return undefined;
+	const head = content.slice(0, 4096);
+	const frontmatter = head.match(/^\s*---\s*\n([\s\S]*?)\n---/u)?.[1] ?? head.split("\n").slice(0, 40).join("\n");
+	const match = frontmatter.match(/^\s*name\s*:\s*([^\n#]+?)\s*$/imu);
+	return normalizeSkillName(match?.[1]);
+}
+
+function skillInvocationForTool(tool: any): SkillInvocationPreview | undefined {
+	if (tool?.toolName !== "read") return undefined;
+	const path = firstStringArg(tool.args, ["path", "file_path"]);
+	const pathName = skillNameFromPath(path);
+	if (!pathName) return undefined;
+
+	const resultName = !isToolPending(tool) && !isToolError(tool) ? skillNameFromMarkdown(textFromToolResult(tool)) : undefined;
+	return {
+		name: resultName ?? pathName,
+		state: isToolPending(tool) ? "pending" : isToolError(tool) ? "error" : "complete",
+		path: normalizeToolPath(path),
+	};
+}
+
+function collectSkillInvocations(tools: any[]): SkillInvocationPreview[] {
+	return tools.map(skillInvocationForTool).filter((skill): skill is SkillInvocationPreview => skill !== undefined);
+}
+
+function appendSkillInvocationLines(lines: string[], skills: SkillInvocationPreview[], width: number): void {
+	for (const skill of skills) {
+		const label = skill.state === "pending" ? "Using skill" : skill.state === "error" ? "Skill failed" : "Used skill";
+		const color = skill.state === "pending" ? "toolTitle" : skill.state === "error" ? "error" : "accent";
+		lines.push(truncateToWidth(fg(color, `${SKILL_LINE_PREFIX}${label}: ${skill.name}`), width, "…"));
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -205,31 +394,42 @@ class ToolBatchSummaryComponent {
 
 		const pendingTools = this.tools.filter(isToolPending);
 		const failedCount = this.tools.filter(isToolError).length;
+		const skillInvocations = collectSkillInvocations(this.tools);
+		const editDiffs = pendingTools.length === 0 ? collectEditDiffs(this.tools) : [];
 
 		let summary = summarizeTools(this.tools);
 		if (failedCount > 0 && pendingTools.length === 0) summary += ` (${failedCount} failed)`;
+		if (editDiffs.length > 0) summary += ":";
 		if (pendingTools.length > 0) summary += "…";
 
+		// Don't let one stale failure paint a long, mostly successful batch red
+		// forever. Keep the failure count in the text, but reserve the red/error
+		// treatment for the actionable case: the latest settled tool failed.
 		const summaryColor =
-			failedCount > 0 && pendingTools.length === 0
-				? "error"
-				: pendingTools.length > 0
-					? "toolTitle"
+			pendingTools.length > 0
+				? "toolTitle"
+				: failedCount > 0 && latestToolFailed(this.tools)
+					? "error"
 					: "muted";
 
 		const lines = ["", truncateToWidth(fg(summaryColor, `${SUMMARY_INDENT}${summary}`), width, "…")];
+		appendSkillInvocationLines(lines, skillInvocations, width);
 		// While the batch is still running, show a dim, tree-connected preview of
 		// the current tool's call (command / file path), capped at
 		// PREVIEW_MAX_LINES. Only the first pending tool is previewed, and each
 		// line is truncated (not wrapped), so the block height is bounded — no
-		// layout shift when the model queues many calls at once.
+		// layout shift when the model queues many calls at once. Skill reads already
+		// get their durable explicit line above, so avoid duplicating their path.
 		if (pendingTools.length > 0) {
-			const preview = previewLines(pendingTools[0], PREVIEW_MAX_LINES);
+			const previewTool = pendingTools[0];
+			const preview = skillInvocationForTool(previewTool) ? [] : semanticPreviewLines(previewTool, PREVIEW_MAX_LINES);
 			for (let i = 0; i < preview.length; i++) {
 				const prefix = SUMMARY_INDENT + (i === 0 ? PREVIEW_CONNECTOR : PREVIEW_CONT_INDENT);
 				const body = truncateToWidth(preview[i], Math.max(1, width - PREVIEW_PREFIX_WIDTH), "…");
 				lines.push(truncateToWidth(fg("dim", prefix + body), width, "…"));
 			}
+		} else if (editDiffs.length > 0) {
+			appendEditDiffLines(lines, editDiffs, width);
 		}
 		return lines;
 	}
@@ -254,6 +454,33 @@ function hasVisibleAssistantText(message: any): boolean {
 	);
 }
 
+function hasAssistantStopNotice(message: any): boolean {
+	if (!message || !Array.isArray(message.content)) return false;
+	if (message.stopReason === "length") return true;
+	const hasToolCalls = message.content.some((c: any) => c?.type === "toolCall");
+	return !hasToolCalls && (message.stopReason === "aborted" || message.stopReason === "error");
+}
+
+function hasAssistantVisibleOutput(message: any): boolean {
+	return hasVisibleAssistantText(message) || hasAssistantStopNotice(message);
+}
+
+function renderedHasVisibleAssistantOutput(comp: any, rendered: unknown): boolean {
+	if (!Array.isArray(rendered)) return false;
+	const hiddenThinkingLabel = stripAnsi(String(comp?.hiddenThinkingLabel ?? "Thinking...")).trim();
+	for (const raw of rendered) {
+		const plain = stripAnsi(String(raw)).trim();
+		if (plain.length === 0) continue;
+		if (hiddenThinkingLabel && plain === hiddenThinkingLabel) continue;
+		return true;
+	}
+	return false;
+}
+
+function isIgnorableToolOnlyAssistant(child: any): boolean {
+	return isAssistantComponent(child) && !hasAssistantVisibleOutput(child.lastMessage) && child.hasToolCalls === true;
+}
+
 // ---------------------------------------------------------------------------
 // chatContainer.addChild interception (the batching engine)
 // ---------------------------------------------------------------------------
@@ -261,12 +488,14 @@ function hasVisibleAssistantText(message: any): boolean {
 const SYM_ORIG = Symbol.for("levi.pi.tool-batch-summary.orig");
 const SYM_STATE = Symbol.for("levi.pi.tool-batch-summary.state");
 const SYM_ARENDER = Symbol.for("levi.pi.tool-batch-summary.assistant-render-wrapped");
+const SYM_AUPDATE = Symbol.for("levi.pi.tool-batch-summary.assistant-update-wrapped");
 
 type BatchState = { batch: ToolBatchSummaryComponent | undefined };
 
 // Can the current batch absorb the next tool? Only if everything added to the
-// chat after the batch is an assistant turn with no visible text (i.e. the
-// streaming/finished assistant message that only thought + called tools).
+// chat after the batch is an assistant turn with no visible user-facing output
+// and confirmed tool calls (i.e. the streaming/finished assistant message that
+// only thought + called tools).
 function canReuseBatch(chat: any, state: BatchState): boolean {
 	const batch = state.batch;
 	if (!batch) return false;
@@ -275,7 +504,7 @@ function canReuseBatch(chat: any, state: BatchState): boolean {
 	if (idx === -1) return false;
 	for (let i = idx + 1; i < children.length; i++) {
 		const child = children[i];
-		if (isAssistantComponent(child) && !hasVisibleAssistantText(child.lastMessage)) continue;
+		if (isIgnorableToolOnlyAssistant(child)) continue;
 		return false;
 	}
 	return true;
@@ -283,17 +512,39 @@ function canReuseBatch(chat: any, state: BatchState): boolean {
 
 // Render-suppress an assistant component that would only show the collapsed
 // "Thinking..." placeholder (thinking hidden, no visible text, tool-only turn).
-function maybeWrapAssistantRender(comp: any): void {
+function maybeWrapAssistantRender(comp: any, state?: BatchState): void {
+	if (comp && state && !comp[SYM_AUPDATE] && typeof comp.updateContent === "function") {
+		comp[SYM_AUPDATE] = true;
+		const origUpdateContent = comp.updateContent.bind(comp);
+		comp.updateContent = (message: any, ...args: any[]) => {
+			const result = origUpdateContent(message, ...args);
+			// If an assistant message gains visible user-facing output after it was
+			// initially added as an empty streaming placeholder, end the current batch
+			// immediately so any following tools render below that text instead of
+			// being retroactively folded into the earlier summary.
+			if (hasAssistantVisibleOutput(message)) {
+				state.batch = undefined;
+			}
+			return result;
+		};
+	}
+
 	if (!SUPPRESS_EMPTY_THINKING) return;
 	if (!comp || comp[SYM_ARENDER]) return;
 	if (typeof comp.render !== "function") return;
 	comp[SYM_ARENDER] = true;
 	const origRender = comp.render.bind(comp);
 	comp.render = (width: number): string[] => {
-		if (comp.hideThinkingBlock && comp.hasToolCalls && !hasVisibleAssistantText(comp.lastMessage)) {
+		const rendered = origRender(width);
+		if (
+			comp.hideThinkingBlock &&
+			comp.hasToolCalls &&
+			!hasVisibleAssistantText(comp.lastMessage) &&
+			!renderedHasVisibleAssistantOutput(comp, rendered)
+		) {
 			return [];
 		}
-		return origRender(width);
+		return rendered;
 	};
 }
 
@@ -310,10 +561,13 @@ function routeAddChild(chat: any, mode: any, orig: any, state: BatchState, compo
 	}
 
 	if (isAssistantComponent(component)) {
-		maybeWrapAssistantRender(component);
-		// An assistant turn with no visible text (only thinking + tool calls)
-		// must NOT break the batch — its tools should keep grouping.
-		if (!hasVisibleAssistantText(component.lastMessage)) {
+		maybeWrapAssistantRender(component, state);
+		// An assistant turn with no visible user-facing output (only hidden
+		// thinking + tool calls) must NOT break the batch — its tools should keep
+		// grouping. If visible text/error appears now or during streaming, the
+		// updateContent wrapper above clears state.batch so later tools start a new
+		// summary below the assistant response.
+		if (!hasAssistantVisibleOutput(component.lastMessage)) {
 			orig.addChild(component);
 			return;
 		}
@@ -475,6 +729,16 @@ export const __test__ = {
 	hasVisibleAssistantText,
 	stripAnsi,
 	previewLines,
+	semanticPreviewLines,
+	latestToolFailed,
+	collectEditDiffs,
+	appendEditDiffLines,
+	collectSkillInvocations,
+	skillInvocationForTool,
+	skillNameFromPath,
+	hasAssistantVisibleOutput,
+	renderedHasVisibleAssistantOutput,
+	isIgnorableToolOnlyAssistant,
 	ToolBatchSummaryComponent,
 	setTheme: (t: any) => {
 		THEME = t;

@@ -150,17 +150,6 @@ const RECAP_STATUS_KEY = "zz-recap";
 const OPENAI_CODEX_USAGE_GLOBAL_KEY = Symbol.for("lepi.openaiCodexUsage");
 const SUBSCRIPTION_USAGE_STALE_MS = 10 * 60 * 1000;
 
-function sessionCost(ctx: { sessionManager: { getEntries(): readonly unknown[] } }): number {
-  let total = 0;
-  for (const entry of ctx.sessionManager.getEntries()) {
-    const message = (entry as any)?.message;
-    if ((entry as any)?.type === "message" && message?.role === "assistant") {
-      total += message.usage?.cost?.total ?? 0;
-    }
-  }
-  return total;
-}
-
 function subscriptionUsageText(): { label: string; pct: number } | undefined {
   const store = (globalThis as any)[OPENAI_CODEX_USAGE_GLOBAL_KEY];
   const snapshot = store?.snapshot;
@@ -288,8 +277,6 @@ export default function (pi: ExtensionAPI) {
           const contextPart = contextUsage?.tokens == null
             ? theme.fg("dim", contextText)
             : `${theme.fg("warning", formatTokens(contextUsage.tokens))}${theme.fg("muted", `/${formatTokens(contextUsage.contextWindow)}`)}`;
-          const costValue = sessionCost(ctx);
-          const cost = costValue > 0 ? theme.fg("muted", `$${costValue.toFixed(5)}`) : undefined;
           const subscriptionUsage = subscriptionUsageText();
           const separator = theme.fg("dim", " • ");
           const subLine = subscriptionUsage
@@ -301,7 +288,6 @@ export default function (pi: ExtensionAPI) {
             theme.fg("muted", model),
             tokensPerSecond ? theme.fg("muted", tokensPerSecond) : undefined,
             subLine,
-            cost,
           ].filter(Boolean).join(separator);
 
           const worktreePart = theme.fg("muted", worktree);
