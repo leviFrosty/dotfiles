@@ -20,9 +20,18 @@
   "enabledPlugins": {
     "chrome-devtools-mcp@claude-plugins-official": false,
     "swift-lsp@claude-plugins-official": true,
-    "playwright@claude-plugins-official": true
+    "playwright@claude-plugins-official": true,
+    "codex@openai-codex": true
   },
-  "effortLevel": "low",
+  "extraKnownMarketplaces": {
+    "openai-codex": {
+      "source": {
+        "source": "github",
+        "repo": "openai/codex-plugin-cc"
+      }
+    }
+  },
+  "effortLevel": "medium",
   "tui": "fullscreen",
   "voice": {
     "enabled": true,

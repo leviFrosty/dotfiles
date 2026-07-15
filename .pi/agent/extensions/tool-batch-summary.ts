@@ -85,10 +85,12 @@ const TOOL_LABELS: Record<string, Label> = {
 	bash: { complete: "ran", pending: "running", singular: "shell command", plural: "shell commands" },
 	edit: { complete: "edited", pending: "editing", singular: "file", plural: "files" },
 	write: { complete: "wrote", pending: "writing", singular: "file", plural: "files" },
+	agent: { complete: "ran", pending: "waiting on", singular: "subagent", plural: "subagents" },
 };
 
 function getToolCategory(toolName: string): string {
 	if (toolName === "grep" || toolName === "find") return "search";
+	if (toolName === "Agent") return "agent";
 	if (toolName in TOOL_LABELS) return toolName;
 	return `tool:${toolName}`;
 }
@@ -683,6 +685,19 @@ function unpatchPrototype(): void {
 let warnedAboutPatch = false;
 
 export default function toolBatchSummary(pi: ExtensionAPI): void {
+	const blockingSubagentCalls = new Set<string>();
+
+	const setWaitingOnSubagent = (ctx: ExtensionContext, waiting: boolean): void => {
+		try {
+			// The Agent row already has its own live spinner and activity text. Hide
+			// pi's separate "Working..." row while that is the thing we're waiting
+			// on, then restore it for the model's next turn.
+			ctx.ui.setWorkingVisible(!waiting);
+		} catch {
+			/* non-TUI mode or older pi: leave the built-in indicator untouched */
+		}
+	};
+
 	try {
 		patchApplied = patchPrototype();
 	} catch {
@@ -711,7 +726,25 @@ export default function toolBatchSummary(pi: ExtensionAPI): void {
 		}
 	});
 
-	pi.on("session_shutdown", async () => {
+	pi.on("tool_execution_start", async (event, ctx) => {
+		const waitsForSubagent =
+			event.toolName === "Agent" ||
+			(event.toolName === "get_subagent_result" && event.args?.wait === true);
+		if (!waitsForSubagent) return;
+		blockingSubagentCalls.add(event.toolCallId);
+		setWaitingOnSubagent(ctx, true);
+	});
+
+	pi.on("tool_execution_end", async (event, ctx) => {
+		if (!blockingSubagentCalls.delete(event.toolCallId)) return;
+		setWaitingOnSubagent(ctx, blockingSubagentCalls.size > 0);
+	});
+
+	pi.on("session_shutdown", async (_event, ctx) => {
+		if (blockingSubagentCalls.size > 0) {
+			blockingSubagentCalls.clear();
+			setWaitingOnSubagent(ctx, false);
+		}
 		try {
 			unpatchPrototype();
 		} catch {
