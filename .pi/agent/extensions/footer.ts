@@ -29,6 +29,23 @@ function getWorktree(cwd: string): string {
   return compactPath(root);
 }
 
+// Branch fallback cache: footerData.getGitBranch() is null outside git repos
+// (and briefly at startup), and render() runs on every TUI frame — spawning a
+// synchronous `git` per frame blocks the event loop mid-stream. Re-check at
+// most every 30s per cwd instead.
+const BRANCH_FALLBACK_TTL_MS = 30_000;
+let branchFallback: { cwd: string; value: string | null; at: number } | undefined;
+
+function gitBranchFallback(cwd: string): string | null {
+  const now = Date.now();
+  if (branchFallback && branchFallback.cwd === cwd && now - branchFallback.at < BRANCH_FALLBACK_TTL_MS) {
+    return branchFallback.value;
+  }
+  const value = runGit(cwd, "branch --show-current");
+  branchFallback = { cwd, value, at: now };
+  return value;
+}
+
 function formatTokens(count: number): string {
   if (!Number.isFinite(count)) return "?";
   if (count < 1000) return Math.round(count).toString();
@@ -262,7 +279,7 @@ export default function (pi: ExtensionAPI) {
         },
         invalidate() {},
         render(width: number): string[] {
-          const branch = footerData.getGitBranch() ?? runGit(ctx.cwd, "branch --show-current") ?? "detached";
+          const branch = footerData.getGitBranch() ?? gitBranchFallback(ctx.cwd) ?? "detached";
           const extensionStatuses = footerData.getExtensionStatuses();
           const recapLine = extensionStatuses.get(RECAP_STATUS_KEY);
           const statuses = [...extensionStatuses.entries()]

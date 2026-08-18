@@ -24,10 +24,10 @@ import { truncateToWidth } from "@earendil-works/pi-tui";
  * the extension quietly no-ops instead of breaking the UI.
  *
  * It also suppresses the redundant collapsed "Thinking..." placeholder that an
- * assistant turn renders when it only thinks + calls tools (no visible text)
- * and thinking display is hidden. Without this, every turn in a long tool loop
- * leaves a stray "Thinking..." line stacked around the batch summary. Set
- * SUPPRESS_EMPTY_THINKING = false to keep those placeholders.
+ * assistant turn renders when it has no visible text and thinking display is
+ * hidden. Without this, thinking-only turns leave a stray "Thinking..." line
+ * in the transcript. Set SUPPRESS_EMPTY_THINKING = false to keep those
+ * placeholders.
  */
 
 // ---------------------------------------------------------------------------
@@ -35,6 +35,24 @@ import { truncateToWidth } from "@earendil-works/pi-tui";
 // ---------------------------------------------------------------------------
 
 const SUPPRESS_EMPTY_THINKING = true;
+
+// Reasoning/thinking blocks are provider-dependent, may be encrypted, and are
+// hidden in this setup. Ask the model for concise normal-text narration instead
+// so tool batches have meaningful, durable boundaries in the transcript.
+const PROGRESS_GUIDANCE = `
+## User-visible progress updates
+
+When work requires tools:
+- Before your first tool call or tool batch, write one or two short sentences in normal assistant text saying what you are about to check and why.
+- After each tool batch returns, if you will continue using tools, first write one or two short sentences in normal assistant text summarizing the relevant result or finding and what you will check next. Then make the next tool call or batch.
+- Do not put these updates only in a thinking or reasoning block; those blocks may be hidden or unavailable. Do not reveal private chain-of-thought. Report only high-level actions, findings, and next steps.
+- Keep quick, isolated tool calls lightweight, but during a long investigation never silently chain tool-only turns without a visible progress update.
+`;
+
+function addProgressGuidance(systemPrompt: string, selectedTools: string[] | undefined): string {
+	if (!selectedTools || selectedTools.length === 0) return systemPrompt;
+	return `${systemPrompt}\n${PROGRESS_GUIDANCE}`;
+}
 
 // In-flight preview: under the running summary line, show a dim, tree-connected
 // preview of the current tool's call (the command / file path), capped at this
@@ -54,11 +72,6 @@ const PREVIEW_RENDER_WIDTH = 4096;
 const DIFF_MAX_LINES = 120;
 const DIFF_INDENT = "     ";
 
-// Skill reads are real read tool calls, but they deserve an explicit durable
-// transcript marker instead of disappearing into "read N files". Render each
-// detected skill read as its own line under the batch summary.
-const SKILL_LINE_PREFIX = SUMMARY_INDENT + PREVIEW_CONNECTOR;
-
 // ---------------------------------------------------------------------------
 // Module state
 // ---------------------------------------------------------------------------
@@ -66,6 +79,23 @@ const SKILL_LINE_PREFIX = SUMMARY_INDENT + PREVIEW_CONNECTOR;
 // The live theme Proxy (captured from ctx.ui.theme). Always reflects the
 // active theme, so a single capture is enough even across theme switches.
 let THEME: any;
+
+type LiveSubagent = {
+	id: string;
+	type?: string;
+	description?: string;
+	status: "queued" | "running";
+	isBackground?: boolean;
+};
+
+// Background agents complete their launch tool call immediately, so they are
+// otherwise indistinguishable from finished tools in a collapsed batch. Keep a
+// small transient registry fed by pi-subagents' public event bus; this is UI
+// state only and never enters the session transcript.
+const LIVE_SUBAGENTS = new Map<string, LiveSubagent>();
+const LIVE_SUBAGENT_MAX_LINES = 4;
+const LIVE_SUBAGENT_STATUS_KEY = "tool-batch-summary-subagents";
+let LIVE_SUBAGENT_UI: any;
 
 function fg(color: string, text: string): string {
 	const t = THEME;
@@ -104,6 +134,84 @@ function getToolLabel(category: string): Label {
 		singular: `${toolName} call`,
 		plural: `${toolName} calls`,
 	};
+}
+
+function refreshLiveSubagentStatus(): void {
+	try {
+		if (!LIVE_SUBAGENT_UI || typeof LIVE_SUBAGENT_UI.setStatus !== "function") return;
+		const agents = [...LIVE_SUBAGENTS.values()];
+		if (agents.length === 0) {
+			LIVE_SUBAGENT_UI.setStatus(LIVE_SUBAGENT_STATUS_KEY, undefined);
+			return;
+		}
+		const labels = agents.slice(0, 2).map(liveSubagentLabel).join(" · ");
+		const more = agents.length > 2 ? ` · +${agents.length - 2} more` : "";
+		LIVE_SUBAGENT_UI.setStatus(
+			LIVE_SUBAGENT_STATUS_KEY,
+			fg("accent", `Agents: ${agents.length} running · ${labels}${more}`),
+		);
+	} catch {
+		/* non-TUI mode or an older pi UI: the in-chat summary remains available */
+	}
+}
+
+function updateLiveSubagent(event: any, status: "created" | "started" | "completed"): void {
+	const id = typeof event?.id === "string" ? event.id : undefined;
+	if (!id) return;
+	if (status === "completed") {
+		LIVE_SUBAGENTS.delete(id);
+		refreshLiveSubagentStatus();
+		return;
+	}
+	const existing = LIVE_SUBAGENTS.get(id);
+	LIVE_SUBAGENTS.set(id, {
+		id,
+		type: typeof event?.type === "string" ? event.type : existing?.type,
+		description: typeof event?.description === "string" ? event.description : existing?.description,
+		status: status === "started" ? "running" : existing?.status ?? "running",
+		isBackground: event?.isBackground === true || existing?.isBackground,
+	});
+	refreshLiveSubagentStatus();
+}
+
+// pi-subagents only emits `subagents:completed` from its background-completion
+// callback; foreground agents never get one, which used to leave the footer
+// stuck at "Agents: N running" forever. When the blocking Agent tool call that
+// owned them returns, every non-background entry is by definition finished.
+function clearForegroundSubagents(): void {
+	let removed = false;
+	for (const [id, agent] of LIVE_SUBAGENTS) {
+		if (!agent.isBackground) {
+			LIVE_SUBAGENTS.delete(id);
+			removed = true;
+		}
+	}
+	if (removed) refreshLiveSubagentStatus();
+}
+
+function liveSubagentLabel(agent: LiveSubagent): string {
+	const description = agent.description?.replace(/\s+/gu, " ").trim();
+	if (description) return description;
+	if (agent.type) return agent.type;
+	return agent.id;
+}
+
+function appendLiveSubagentLines(lines: string[], width: number): void {
+	const agents = [...LIVE_SUBAGENTS.values()];
+	if (agents.length === 0) return;
+
+	const countLabel = `${agents.length} subagent${agents.length === 1 ? "" : "s"} in progress`;
+	lines.push(truncateToWidth(fg("toolTitle", `${SUMMARY_INDENT}${PREVIEW_CONNECTOR}${countLabel}`), width, "…"));
+
+	const visible = agents.slice(0, LIVE_SUBAGENT_MAX_LINES);
+	for (let i = 0; i < visible.length; i++) {
+		const isLast = i === visible.length - 1 && agents.length <= LIVE_SUBAGENT_MAX_LINES;
+		const prefix = `${DIFF_INDENT}${isLast ? "└─ " : "├─ "}`;
+		lines.push(truncateToWidth(fg("dim", `${prefix}${liveSubagentLabel(visible[i])}`), width, "…"));
+	}
+	if (agents.length > LIVE_SUBAGENT_MAX_LINES) {
+		lines.push(truncateToWidth(fg("muted", `${DIFF_INDENT}└─ … ${agents.length - LIVE_SUBAGENT_MAX_LINES} more`), width, "…"));
+	}
 }
 
 function isToolPending(component: any): boolean {
@@ -346,11 +454,49 @@ function collectSkillInvocations(tools: any[]): SkillInvocationPreview[] {
 	return tools.map(skillInvocationForTool).filter((skill): skill is SkillInvocationPreview => skill !== undefined);
 }
 
-function appendSkillInvocationLines(lines: string[], skills: SkillInvocationPreview[], width: number): void {
-	for (const skill of skills) {
-		const label = skill.state === "pending" ? "Using skill" : skill.state === "error" ? "Skill failed" : "Used skill";
-		const color = skill.state === "pending" ? "toolTitle" : skill.state === "error" ? "error" : "accent";
-		lines.push(truncateToWidth(fg(color, `${SKILL_LINE_PREFIX}${label}: ${skill.name}`), width, "…"));
+// ---------------------------------------------------------------------------
+// Skill component
+// ---------------------------------------------------------------------------
+
+class SkillLoadComponent {
+	expanded = false;
+
+	constructor(private readonly tool: any) {}
+
+	setExpanded(expanded: boolean): void {
+		this.expanded = expanded;
+		this.tool.setExpanded?.(expanded);
+	}
+
+	setShowImages(show: boolean): void {
+		this.tool.setShowImages?.(show);
+	}
+
+	setImageWidthCells(width: number): void {
+		this.tool.setImageWidthCells?.(width);
+	}
+
+	invalidate(): void {
+		this.tool.invalidate?.();
+	}
+
+	render(width: number): string[] {
+		if (this.expanded) return this.tool.render(width);
+		const skill = skillInvocationForTool(this.tool);
+		if (!skill) return this.tool.render(width);
+
+		const color = skill.state === "pending" ? "toolTitle" : skill.state === "error" ? "error" : "success";
+		const detail =
+			skill.state === "pending"
+				? "Loading skill…"
+				: skill.state === "error"
+					? "Failed to load skill"
+					: "Successfully loaded skill";
+		return [
+			"",
+			truncateToWidth(`${SUMMARY_INDENT}${fg(color, "●")} ${fg("text", `Skill(${skill.name})`)}`, width, "…"),
+			truncateToWidth(fg(skill.state === "error" ? "error" : "text", `${DIFF_INDENT}└ ${detail}`), width, "…"),
+		];
 	}
 }
 
@@ -394,12 +540,19 @@ class ToolBatchSummaryComponent {
 		if (this.tools.length === 0) return [];
 		if (this.expanded) return this.tools.flatMap((tool) => tool.render(width));
 
-		const pendingTools = this.tools.filter(isToolPending);
-		const failedCount = this.tools.filter(isToolError).length;
-		const skillInvocations = collectSkillInvocations(this.tools);
-		const editDiffs = pendingTools.length === 0 ? collectEditDiffs(this.tools) : [];
+		// Tool-call arguments arrive incrementally. Reclassify at render time so a
+		// read inserted before its path was known can become a Claude-style skill
+		// block once `.../skills/<name>/SKILL.md` streams in.
+		const skillTools = this.tools.filter((tool) => skillInvocationForTool(tool) !== undefined);
+		const ordinaryTools = this.tools.filter((tool) => skillInvocationForTool(tool) === undefined);
+		const skillLines = skillTools.flatMap((tool) => new SkillLoadComponent(tool).render(width));
+		if (ordinaryTools.length === 0) return skillLines;
 
-		let summary = summarizeTools(this.tools);
+		const pendingTools = ordinaryTools.filter(isToolPending);
+		const failedCount = ordinaryTools.filter(isToolError).length;
+		const editDiffs = pendingTools.length === 0 ? collectEditDiffs(ordinaryTools) : [];
+
+		let summary = summarizeTools(ordinaryTools);
 		if (failedCount > 0 && pendingTools.length === 0) summary += ` (${failedCount} failed)`;
 		if (editDiffs.length > 0) summary += ":";
 		if (pendingTools.length > 0) summary += "…";
@@ -410,21 +563,24 @@ class ToolBatchSummaryComponent {
 		const summaryColor =
 			pendingTools.length > 0
 				? "toolTitle"
-				: failedCount > 0 && latestToolFailed(this.tools)
+				: failedCount > 0 && latestToolFailed(ordinaryTools)
 					? "error"
 					: "muted";
 
 		const lines = ["", truncateToWidth(fg(summaryColor, `${SUMMARY_INDENT}${summary}`), width, "…")];
-		appendSkillInvocationLines(lines, skillInvocations, width);
+		if (ordinaryTools.some((tool) =>
+			tool?.toolName === "Agent" || tool?.toolName === "get_subagent_result" || tool?.toolName === "steer_subagent",
+		)) {
+			appendLiveSubagentLines(lines, width);
+		}
 		// While the batch is still running, show a dim, tree-connected preview of
 		// the current tool's call (command / file path), capped at
 		// PREVIEW_MAX_LINES. Only the first pending tool is previewed, and each
 		// line is truncated (not wrapped), so the block height is bounded — no
-		// layout shift when the model queues many calls at once. Skill reads already
-		// get their durable explicit line above, so avoid duplicating their path.
+		// layout shift when the model queues many calls at once.
 		if (pendingTools.length > 0) {
 			const previewTool = pendingTools[0];
-			const preview = skillInvocationForTool(previewTool) ? [] : semanticPreviewLines(previewTool, PREVIEW_MAX_LINES);
+			const preview = semanticPreviewLines(previewTool, PREVIEW_MAX_LINES);
 			for (let i = 0; i < preview.length; i++) {
 				const prefix = SUMMARY_INDENT + (i === 0 ? PREVIEW_CONNECTOR : PREVIEW_CONT_INDENT);
 				const body = truncateToWidth(preview[i], Math.max(1, width - PREVIEW_PREFIX_WIDTH), "…");
@@ -433,6 +589,7 @@ class ToolBatchSummaryComponent {
 		} else if (editDiffs.length > 0) {
 			appendEditDiffLines(lines, editDiffs, width);
 		}
+		lines.push(...skillLines);
 		return lines;
 	}
 }
@@ -467,14 +624,20 @@ function hasAssistantVisibleOutput(message: any): boolean {
 	return hasVisibleAssistantText(message) || hasAssistantStopNotice(message);
 }
 
+function hiddenThinkingLabel(comp: any): string {
+	return stripAnsi(String(comp?.hiddenThinkingLabel ?? "Thinking...")).trim();
+}
+
+function removeHiddenThinkingPlaceholder(comp: any, rendered: unknown): string[] {
+	if (!Array.isArray(rendered)) return [];
+	const label = hiddenThinkingLabel(comp);
+	if (!label) return rendered;
+	return rendered.filter((raw) => stripAnsi(String(raw)).trim() !== label);
+}
+
 function renderedHasVisibleAssistantOutput(comp: any, rendered: unknown): boolean {
-	if (!Array.isArray(rendered)) return false;
-	const hiddenThinkingLabel = stripAnsi(String(comp?.hiddenThinkingLabel ?? "Thinking...")).trim();
-	for (const raw of rendered) {
-		const plain = stripAnsi(String(raw)).trim();
-		if (plain.length === 0) continue;
-		if (hiddenThinkingLabel && plain === hiddenThinkingLabel) continue;
-		return true;
+	for (const raw of removeHiddenThinkingPlaceholder(comp, rendered)) {
+		if (stripAnsi(String(raw)).trim().length > 0) return true;
 	}
 	return false;
 }
@@ -513,18 +676,20 @@ function canReuseBatch(chat: any, state: BatchState): boolean {
 }
 
 // Render-suppress an assistant component that would only show the collapsed
-// "Thinking..." placeholder (thinking hidden, no visible text, tool-only turn).
+// "Thinking..." placeholder (thinking hidden and no visible assistant output).
 function maybeWrapAssistantRender(comp: any, state?: BatchState): void {
 	if (comp && state && !comp[SYM_AUPDATE] && typeof comp.updateContent === "function") {
 		comp[SYM_AUPDATE] = true;
 		const origUpdateContent = comp.updateContent.bind(comp);
 		comp.updateContent = (message: any, ...args: any[]) => {
+			const wasVisible = hasAssistantVisibleOutput(comp.lastMessage);
 			const result = origUpdateContent(message, ...args);
-			// If an assistant message gains visible user-facing output after it was
-			// initially added as an empty streaming placeholder, end the current batch
-			// immediately so any following tools render below that text instead of
-			// being retroactively folded into the earlier summary.
-			if (hasAssistantVisibleOutput(message)) {
+			// If an assistant message first gains visible user-facing output after it
+			// was added as an empty streaming placeholder, end the current batch so
+			// following tools render below that text. Providers repeat the accumulated
+			// visible text on every streaming update; those repeats must not split
+			// incrementally arriving sibling tool calls into one-row batches.
+			if (!wasVisible && hasAssistantVisibleOutput(message)) {
 				state.batch = undefined;
 			}
 			return result;
@@ -538,19 +703,28 @@ function maybeWrapAssistantRender(comp: any, state?: BatchState): void {
 	const origRender = comp.render.bind(comp);
 	comp.render = (width: number): string[] => {
 		const rendered = origRender(width);
+		if (!comp.hideThinkingBlock) return rendered;
+
+		const withoutThinkingPlaceholder = removeHiddenThinkingPlaceholder(comp, rendered);
 		if (
-			comp.hideThinkingBlock &&
-			comp.hasToolCalls &&
 			!hasVisibleAssistantText(comp.lastMessage) &&
-			!renderedHasVisibleAssistantOutput(comp, rendered)
+			!renderedHasVisibleAssistantOutput(comp, withoutThinkingPlaceholder)
 		) {
 			return [];
 		}
-		return rendered;
+		return withoutThinkingPlaceholder;
 	};
 }
 
 function routeAddChild(chat: any, mode: any, orig: any, state: BatchState, component: any): void {
+	if (isToolComponent(component) && skillInvocationForTool(component)) {
+		state.batch = undefined;
+		const skill = new SkillLoadComponent(component);
+		skill.setExpanded(!!mode.toolOutputExpanded);
+		orig.addChild(skill);
+		return;
+	}
+
 	if (isToolComponent(component)) {
 		if (!canReuseBatch(chat, state)) {
 			const batch = new ToolBatchSummaryComponent();
@@ -687,12 +861,11 @@ let warnedAboutPatch = false;
 export default function toolBatchSummary(pi: ExtensionAPI): void {
 	const blockingSubagentCalls = new Set<string>();
 
-	const setWaitingOnSubagent = (ctx: ExtensionContext, waiting: boolean): void => {
+	const setWaitingOnSubagent = (ctx: ExtensionContext, _waiting: boolean): void => {
 		try {
-			// The Agent row already has its own live spinner and activity text. Hide
-			// pi's separate "Working..." row while that is the thing we're waiting
-			// on, then restore it for the model's next turn.
-			ctx.ui.setWorkingVisible(!waiting);
+			// Keep the main response timer visible while subagents run so the user
+			// can see the total elapsed time alongside the Agent activity row.
+			ctx.ui.setWorkingVisible(true);
 		} catch {
 			/* non-TUI mode or older pi: leave the built-in indicator untouched */
 		}
@@ -704,7 +877,27 @@ export default function toolBatchSummary(pi: ExtensionAPI): void {
 		patchApplied = false; // never let a patch failure crash startup
 	}
 
+	// Keep the unsubscribe closures: pi.events is a persistent shared bus, so
+	// without explicit cleanup every /reload stacks another generation of these.
+	const eventUnsubs: Array<() => void> = [
+		pi.events.on("subagents:created", (event: any) => updateLiveSubagent(event, "created")),
+		pi.events.on("subagents:started", (event: any) => updateLiveSubagent(event, "started")),
+		pi.events.on("subagents:completed", (event: any) => updateLiveSubagent(event, "completed")),
+		pi.events.on("subagents:failed", (event: any) => updateLiveSubagent(event, "completed")),
+	];
+
+	pi.on("before_agent_start", async (event) => ({
+		systemPrompt: addProgressGuidance(event.systemPrompt, event.systemPromptOptions.selectedTools),
+	}));
+
 	pi.on("session_start", async (_event, ctx: ExtensionContext) => {
+		// Subagents run in-process and re-run this extension against the same
+		// module instance; their headless runtimes must not steal the status UI
+		// (their ctx.ui.setStatus is a no-op stub) or wipe the shared registry.
+		if (ctx.mode !== "tui") return;
+		LIVE_SUBAGENTS.clear();
+		LIVE_SUBAGENT_UI = ctx.ui;
+		refreshLiveSubagentStatus();
 		try {
 			const t = (ctx.ui as any)?.theme;
 			if (t) THEME = t;
@@ -727,6 +920,9 @@ export default function toolBatchSummary(pi: ExtensionAPI): void {
 	});
 
 	pi.on("tool_execution_start", async (event, ctx) => {
+		if (ctx.mode !== "tui") return;
+		LIVE_SUBAGENT_UI = ctx.ui;
+		refreshLiveSubagentStatus();
 		const waitsForSubagent =
 			event.toolName === "Agent" ||
 			(event.toolName === "get_subagent_result" && event.args?.wait === true);
@@ -738,12 +934,28 @@ export default function toolBatchSummary(pi: ExtensionAPI): void {
 	pi.on("tool_execution_end", async (event, ctx) => {
 		if (!blockingSubagentCalls.delete(event.toolCallId)) return;
 		setWaitingOnSubagent(ctx, blockingSubagentCalls.size > 0);
+		if (blockingSubagentCalls.size === 0) clearForegroundSubagents();
 	});
 
 	pi.on("session_shutdown", async (_event, ctx) => {
-		if (blockingSubagentCalls.size > 0) {
-			blockingSubagentCalls.clear();
-			setWaitingOnSubagent(ctx, false);
+		// Shared UI/registry state belongs to the TUI session; in-process
+		// subagent runtimes only clean up their own listeners and patch below.
+		if (ctx.mode === "tui") {
+			LIVE_SUBAGENTS.clear();
+			LIVE_SUBAGENT_UI = ctx.ui;
+			refreshLiveSubagentStatus();
+			LIVE_SUBAGENT_UI = undefined;
+			if (blockingSubagentCalls.size > 0) {
+				blockingSubagentCalls.clear();
+				setWaitingOnSubagent(ctx, false);
+			}
+		}
+		for (const unsub of eventUnsubs.splice(0)) {
+			try {
+				unsub();
+			} catch {
+				/* ignore */
+			}
 		}
 		try {
 			unpatchPrototype();
@@ -771,9 +983,12 @@ export const __test__ = {
 	skillNameFromPath,
 	hasAssistantVisibleOutput,
 	renderedHasVisibleAssistantOutput,
+	removeHiddenThinkingPlaceholder,
 	isIgnorableToolOnlyAssistant,
 	ToolBatchSummaryComponent,
+	SkillLoadComponent,
 	setTheme: (t: any) => {
 		THEME = t;
 	},
+	addProgressGuidance,
 };

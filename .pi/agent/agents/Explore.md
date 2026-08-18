@@ -3,7 +3,7 @@ description: Fast, read-only codebase search agent. Use proactively for file dis
 tools: read, bash, grep, find, ls
 extensions: false
 skills: false
-model: openai-codex/gpt-5.4-mini
+model: openai-codex/gpt-5.6-luna
 thinking: low
 prompt_mode: replace
 isolated: true

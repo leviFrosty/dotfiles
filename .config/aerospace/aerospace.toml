@@ -246,3 +246,8 @@ run = "move-node-to-workspace chat"
 [[on-window-detected]]
 if.app-id = 'com.apple.iphonesimulator'
 run = 'layout tiling'
+
+[[on-window-detected]]
+if.app-id = 'cc.ffitch.shottr'
+run = 'layout floating'
+

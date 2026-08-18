@@ -23,3 +23,5 @@
 	colorMoved = default
 [include]
 	path = ~/.config/delta/themes.gitconfig
+[url "git@gitlab.whqmeps.org:"]
+	insteadOf = https://gitlab.whqmeps.org/

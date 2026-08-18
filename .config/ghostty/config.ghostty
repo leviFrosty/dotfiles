@@ -37,5 +37,5 @@ window-padding-y = 5
 # WezTerm's RESIZE decoration: keep the window resizable while hiding the titlebar.
 macos-titlebar-style = hidden
 
-background-opacity = 0.85
+background-opacity = 0.95
 background-blur = 10

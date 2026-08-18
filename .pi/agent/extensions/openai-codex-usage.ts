@@ -4,6 +4,10 @@ const STATUS_KEY = "aa-openai-codex-usage";
 const GLOBAL_KEY = Symbol.for("lepi.openaiCodexUsage");
 const USAGE_URL = "https://chatgpt.com/backend-api/wham/usage";
 const REFRESH_INTERVAL_MS = 30_000;
+// Battery: after this long without agent activity, drop from the 30s cadence
+// to the idle cadence so untouched sessions stop waking the radio twice a minute.
+const IDLE_AFTER_MS = 5 * 60_000;
+const IDLE_REFRESH_INTERVAL_MS = 5 * 60_000;
 const REQUEST_TIMEOUT_MS = 15_000;
 const STALE_AFTER_MS = 10 * 60_000;
 const CODEX_PROVIDER_ID = "openai-codex";
@@ -197,6 +201,8 @@ export default function openAICodexUsageExtension(pi: ExtensionAPI) {
   let refreshTimer: ReturnType<typeof setInterval> | undefined;
   let activeAbort: AbortController | undefined;
   let refreshCurrent: (() => void) | undefined;
+  let lastActivityAt = Date.now();
+  let lastPollAt = 0;
 
   const stop = () => {
     generation += 1;
@@ -219,6 +225,7 @@ export default function openAICodexUsageExtension(pi: ExtensionAPI) {
     }
 
     usageStore.inFlight = true;
+    lastPollAt = Date.now();
     const controller = new AbortController();
     activeAbort = controller;
     const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -246,13 +253,30 @@ export default function openAICodexUsageExtension(pi: ExtensionAPI) {
   pi.on("session_start", async (_event, ctx) => {
     if (ctx.mode !== "tui") return;
     stop();
+    lastActivityAt = Date.now();
     const currentGeneration = ++generation;
-    refreshCurrent = () => void refreshUsage(ctx, currentGeneration);
+    refreshCurrent = () => {
+      const idle = Date.now() - lastActivityAt > IDLE_AFTER_MS;
+      if (idle && Date.now() - lastPollAt < IDLE_REFRESH_INTERVAL_MS) return;
+      void refreshUsage(ctx, currentGeneration);
+    };
     refreshCurrent();
     refreshTimer = setInterval(refreshCurrent, REFRESH_INTERVAL_MS);
   });
 
+  pi.on("agent_start", async () => {
+    lastActivityAt = Date.now();
+  });
+
+  pi.on("agent_settled", async (_event, ctx) => {
+    lastActivityAt = Date.now();
+    if (ctx.mode !== "tui") return;
+    // Usage just changed on the server; refresh now rather than on the next tick.
+    void refreshUsage(ctx, generation);
+  });
+
   pi.on("model_select", async (_event, ctx) => {
+    lastActivityAt = Date.now();
     if (ctx.mode !== "tui") return;
     void refreshUsage(ctx, generation);
   });

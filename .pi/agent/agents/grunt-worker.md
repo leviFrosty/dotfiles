@@ -3,7 +3,7 @@ description: Cost-efficient implementation agent for repetitive, well-specified 
 tools: read, bash, grep, find, ls, write, edit
 extensions: true
 skills: true
-model: openai-codex/gpt-5.6-terra
+model: openai-codex/gpt-5.6-luna
 thinking: low
 max_turns: 50
 prompt_mode: append

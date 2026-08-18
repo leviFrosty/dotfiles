@@ -1,235 +1,354 @@
-import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { DynamicBorder } from "@earendil-works/pi-coding-agent";
-import { getSupportedThinkingLevels, type ModelThinkingLevel } from "@earendil-works/pi-ai";
+import { DynamicBorder, keyHint, type ExtensionAPI, type ExtensionContext } from "@earendil-works/pi-coding-agent";
+import type { ModelThinkingLevel } from "@earendil-works/pi-ai";
 import { Container, Key, Text, matchesKey, truncateToWidth, type AutocompleteItem } from "@earendil-works/pi-tui";
+import {
+	capabilitiesFromPi,
+	capabilitiesFromProviderCatalog,
+	completionAliases,
+	effortLabel,
+	modelKey,
+	normalizeEffort,
+	parseEffort,
+	type EffortCapabilities,
+	type EffortOption,
+} from "./effort/capabilities.ts";
+import { loadProviderCatalog } from "./effort/provider-catalog.ts";
 
-const LEVELS = ["off", "minimal", "low", "medium", "high", "xhigh"] as const satisfies readonly ModelThinkingLevel[];
-type EffortLevel = (typeof LEVELS)[number];
+const SELECTION_ENTRY = "effort-selection";
+const INFO_ENTRY = "effort-info";
 
-const ALIASES: Record<EffortLevel, readonly string[]> = {
-	off: ["off", "none", "no", "disable", "disabled", "0"],
-	minimal: ["minimal", "min", "minimum"],
-	low: ["low"],
-	medium: ["medium", "med", "mid"],
-	high: ["high"],
-	xhigh: ["xhigh", "x-high", "x_high", "extra-high", "extra_high", "xhi", "x-hi", "max", "maximum"],
-};
-
-function normalize(input: string): string {
-	return input.trim().toLowerCase().replace(/^--?/, "");
+interface PersistedSelection {
+	modelKey: string;
+	effort: string;
 }
 
-function parseEffort(input: string): EffortLevel | undefined {
-	const normalized = normalize(input);
-	if (!normalized) return undefined;
-	for (const level of LEVELS) {
-		if (ALIASES[level].includes(normalized)) return level;
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function persistedSelection(ctx: ExtensionContext, key: string): string | undefined {
+	const branch = ctx.sessionManager.getBranch();
+	for (let index = branch.length - 1; index >= 0; index--) {
+		const entry = branch[index];
+		if (entry?.type !== "custom" || entry.customType !== SELECTION_ENTRY || !isRecord(entry.data)) continue;
+		if (entry.data.modelKey === key && typeof entry.data.effort === "string") return entry.data.effort;
 	}
 	return undefined;
 }
 
-function levelLabel(level: EffortLevel, _ctx?: ExtensionContext): string {
-	return level;
-}
-
-function modelName(ctx: ExtensionContext): string {
-	return ctx.model ? `${ctx.model.provider}/${ctx.model.id}` : "(no model selected)";
-}
-
-function availableLevels(ctx: ExtensionContext): EffortLevel[] {
-	if (!ctx.model) return [...LEVELS];
-	return getSupportedThinkingLevels(ctx.model) as EffortLevel[];
-}
-
-function mappingDetails(ctx: ExtensionContext): string {
-	const model = ctx.model;
-	if (!model?.thinkingLevelMap || Object.keys(model.thinkingLevelMap).length === 0) {
-		return "No model-specific effort map. Defaults apply: reasoning models support off/minimal/low/medium/high; the top xhigh tier only appears when explicitly mapped by the model.";
+function sourceLabel(capabilities: EffortCapabilities): string {
+	switch (capabilities.source) {
+		case "provider-catalog":
+			return `live provider catalog${capabilities.fetchedAt ? ` (cached ${capabilities.fetchedAt})` : ""}`;
+		case "stale-provider-catalog":
+			return `stale provider catalog${capabilities.fetchedAt ? ` (${capabilities.fetchedAt})` : ""}`;
+		case "pi-model-metadata":
+			return "Pi model metadata";
 	}
-
-	const entries = LEVELS.map((level) => {
-		const mapped = model.thinkingLevelMap?.[level];
-		if (mapped === null) return `${level}: unsupported`;
-		if (typeof mapped === "string") return `${level}: provider value "${mapped}"`;
-		return `${level}: default`;
-	});
-	return `Model effort map: ${entries.join(", ")}.`;
 }
 
-function effortDetails(ctx: ExtensionContext, reason?: string): string {
-	const model = ctx.model;
-	const current = piSafeCurrentLevel(ctx);
-	const supported = availableLevels(ctx);
-	const reasoning = model?.reasoning ? "yes" : "no";
-	const aliases = LEVELS.map((level) => `${level} (${ALIASES[level].join("|")})`).join(", ");
-
-	return [
-		reason ? `Effort unchanged: ${reason}` : "Effort capabilities",
-		`Model: ${modelName(ctx)}`,
-		`Reasoning/effort capable: ${reasoning}`,
-		`Current effort: ${levelLabel(current, ctx)}`,
-		`Available for this model: ${supported.map((level) => levelLabel(level, ctx)).join(", ")}`,
-		mappingDetails(ctx),
-		`Accepted exact aliases: ${aliases}`,
-	].join("\n");
-}
-
-let getCurrentLevel: (() => EffortLevel) | undefined;
-function piSafeCurrentLevel(_ctx: ExtensionContext): EffortLevel {
-	return (getCurrentLevel?.() ?? "off") as EffortLevel;
-}
-
-function sendEffortMessage(pi: ExtensionAPI, content: string) {
-	pi.sendMessage({
-		customType: "effort",
-		content,
-		display: true,
-	});
-}
-
-function updateStatus(ctx: ExtensionContext, level: EffortLevel) {
-	const thinkingColor = ctx.ui.theme.getThinkingBorderColor(level);
-	ctx.ui.setStatus("effort", thinkingColor(levelLabel(level, ctx)));
-}
-
-async function setEffort(pi: ExtensionAPI, ctx: ExtensionContext, requested: EffortLevel): Promise<boolean> {
-	const supported = availableLevels(ctx);
-	if (!supported.includes(requested)) {
-		const reason = `"${levelLabel(requested, ctx)}" is not available for ${modelName(ctx)}.`;
-		sendEffortMessage(pi, effortDetails(ctx, reason));
-		ctx.ui.notify(reason, "warning");
-		return false;
-	}
-
-	const previous = pi.getThinkingLevel() as EffortLevel;
-	pi.setThinkingLevel(requested);
-	const effective = pi.getThinkingLevel() as EffortLevel;
-	updateStatus(ctx, effective);
-
-	if (effective !== requested) {
-		const reason = `requested "${levelLabel(requested, ctx)}" but pi clamped it to "${levelLabel(effective, ctx)}" for ${modelName(ctx)}.`;
-		sendEffortMessage(pi, effortDetails(ctx, reason));
-		ctx.ui.notify(`Effort clamped to ${levelLabel(effective, ctx)}`, "warning");
-		return false;
-	}
-
-	ctx.ui.notify(
-		previous === effective ? `Effort already ${levelLabel(effective, ctx)}` : `Effort set to ${levelLabel(effective, ctx)}`,
-		"info",
-	);
-	return true;
-}
-
-async function showEffortSlider(pi: ExtensionAPI, ctx: ExtensionContext): Promise<void> {
-	if (ctx.mode !== "tui") {
-		sendEffortMessage(pi, effortDetails(ctx, "/effort without an argument requires TUI mode for the interactive slider."));
-		return;
-	}
-
-	const supported = availableLevels(ctx);
-	let selectedIndex = Math.max(0, supported.indexOf(pi.getThinkingLevel() as EffortLevel));
-
-	const result = await ctx.ui.custom<EffortLevel | null>((tui, theme, _kb, done) => {
-		const renderSlider = (width: number): string[] => {
-			const container = new Container();
-			container.addChild(new DynamicBorder((s: string) => theme.fg("accent", s)));
-			container.addChild(new Text(theme.fg("accent", theme.bold("Effort Level")), 1, 0));
-			container.addChild(new Text(theme.fg("muted", modelName(ctx)), 1, 0));
-
-			const chunks = supported.map((level, index) => {
-				const display = levelLabel(level, ctx);
-				const label = index === selectedIndex ? `[${display}]` : ` ${display} `;
-				return index === selectedIndex ? theme.fg("accent", theme.bold(label)) : theme.fg("muted", label);
-			});
-			container.addChild(new Text(chunks.join(theme.fg("dim", " ─ ")), 1, 1));
-			container.addChild(new Text(theme.fg("dim", "←/→ or ↑/↓ change • enter apply • esc cancel"), 1, 0));
-			container.addChild(
-				new Text(theme.fg("dim", `Available: ${supported.map((level) => levelLabel(level, ctx)).join(", ")}`), 1, 0),
-			);
-			container.addChild(new DynamicBorder((s: string) => theme.fg("accent", s)));
-			return container.render(width).map((line) => truncateToWidth(line, width));
-		};
-
-		return {
-			render(width: number) {
-				return renderSlider(width);
-			},
-			invalidate() {},
-			handleInput(data: string) {
-				if (matchesKey(data, Key.right) || matchesKey(data, Key.down)) {
-					selectedIndex = (selectedIndex + 1) % supported.length;
-					tui.requestRender();
-					return;
-				}
-				if (matchesKey(data, Key.left) || matchesKey(data, Key.up)) {
-					selectedIndex = (selectedIndex - 1 + supported.length) % supported.length;
-					tui.requestRender();
-					return;
-				}
-				if (matchesKey(data, Key.enter)) {
-					done(supported[selectedIndex] ?? null);
-					return;
-				}
-				if (matchesKey(data, Key.escape)) {
-					done(null);
-				}
-			},
-		};
-	});
-
-	if (result) {
-		await setEffort(pi, ctx, result);
-	}
+function optionDetails(option: EffortOption): string {
+	const mapping =
+		option.mappedValue && option.mappedValue !== option.id
+			? `Pi ${option.piLevel} → provider "${option.mappedValue}"`
+			: `Pi ${option.piLevel}`;
+	return `${option.label} (${option.id}; ${mapping})${option.description ? ` — ${option.description}` : ""}`;
 }
 
 export default function effortExtension(pi: ExtensionAPI) {
-	getCurrentLevel = () => pi.getThinkingLevel() as EffortLevel;
+	let capabilities: EffortCapabilities | undefined;
+	let selectedId: string | undefined;
+	let pendingPiLevel: ModelThinkingLevel | undefined;
+	let refreshGeneration = 0;
+	let initialized = false;
 
-	pi.registerMessageRenderer("effort", (message, _options, theme) => {
-		return new Text(theme.fg("customMessageLabel", "effort") + "\n" + message.content, 1, 0);
+	const currentOption = (): EffortOption | undefined => capabilities?.options.find((option) => option.id === selectedId);
+
+	const appendInfo = (content: string) => {
+		pi.appendEntry(INFO_ENTRY, { content });
+	};
+
+	const recordSelection = (option: EffortOption) => {
+		if (!capabilities) return;
+		pi.appendEntry(SELECTION_ENTRY, {
+			modelKey: capabilities.modelKey,
+			effort: option.id,
+		} satisfies PersistedSelection);
+	};
+
+	const updateStatus = (ctx: ExtensionContext) => {
+		const option = currentOption();
+		const piLevel = option?.piLevel ?? (pi.getThinkingLevel() as ModelThinkingLevel);
+		const color = ctx.ui.theme.getThinkingBorderColor(piLevel);
+		const label = option?.label ?? effortLabel(piLevel);
+		ctx.ui.setStatus("effort", color(label));
+	};
+
+	const details = (ctx: ExtensionContext, heading = "Effort capabilities"): string => {
+		const model = ctx.model;
+		if (!model || !capabilities) return `${heading}\nModel: (no model selected)\nAvailable: none`;
+		const option = currentOption();
+		const ignored = capabilities.ignoredProviderLevels ?? [];
+		return [
+			heading,
+			`Model: ${capabilities.modelKey}`,
+			`Source: ${sourceLabel(capabilities)}`,
+			`Current effort: ${option?.label ?? "unknown"}${option ? ` (${option.id})` : ""}`,
+			"Available:",
+			...capabilities.options.map((candidate) => `  - ${optionDetails(candidate)}`),
+			...(ignored.length > 0
+				? [
+						"Catalog-only modes not exposed by Pi's model/transport:",
+						...ignored.map(
+							(level) => `  - ${effortLabel(level.id)} (${level.id})${level.description ? ` — ${level.description}` : ""}`,
+						),
+					]
+				: []),
+			...(capabilities.warning ? [`Warning: ${capabilities.warning}`] : []),
+		].join("\n");
+	};
+
+	const applyOption = (
+		ctx: ExtensionContext,
+		option: EffortOption,
+		options: { persist: boolean; notify: boolean },
+	): boolean => {
+		const previousId = selectedId;
+		selectedId = option.id;
+
+		if (pi.getThinkingLevel() !== option.piLevel) {
+			pendingPiLevel = option.piLevel;
+			pi.setThinkingLevel(option.piLevel);
+		}
+		const effective = pi.getThinkingLevel() as ModelThinkingLevel;
+		if (effective !== option.piLevel) {
+			selectedId = capabilities?.options.find((candidate) => candidate.piLevel === effective)?.id;
+			const reason = `Pi clamped ${option.label} to ${effortLabel(effective)} for ${capabilities?.modelKey ?? "the active model"}.`;
+			appendInfo(details(ctx, reason));
+			ctx.ui.notify(reason, "warning");
+			updateStatus(ctx);
+			return false;
+		}
+
+		if (options.persist) recordSelection(option);
+		updateStatus(ctx);
+		if (options.notify) {
+			ctx.ui.notify(previousId === option.id ? `Effort already ${option.label}` : `Effort set to ${option.label}`, "info");
+		}
+		return true;
+	};
+
+	const synchronizeModel = async (
+		ctx: ExtensionContext,
+		options: { force?: boolean; restore?: boolean } = {},
+	): Promise<void> => {
+		const model = ctx.model;
+		const generation = ++refreshGeneration;
+		if (!model) {
+			capabilities = undefined;
+			selectedId = undefined;
+			updateStatus(ctx);
+			return;
+		}
+
+		const key = modelKey(model);
+		let next = capabilitiesFromPi(model);
+		capabilities = next;
+
+		const catalog = await loadProviderCatalog(model, ctx.modelRegistry, { force: options.force });
+		if (generation !== refreshGeneration || !ctx.model || modelKey(ctx.model) !== key) return;
+		if (catalog?.model) {
+			next =
+				capabilitiesFromProviderCatalog(model, catalog.model, {
+					stale: catalog.stale,
+					fetchedAt: catalog.fetchedAt,
+					warning: catalog.warning,
+				}) ?? next;
+		} else if (catalog?.fetchedAt) {
+			// A valid provider catalog that omits the active model is authoritative:
+			// the safe intersection is empty, not Pi's broader static defaults.
+			next = {
+				modelKey: key,
+				options: [],
+				source: catalog.stale ? "stale-provider-catalog" : "provider-catalog",
+				fetchedAt: catalog.fetchedAt,
+				warning: catalog.warning ?? "The active model was absent from the provider catalog.",
+			};
+		} else if (catalog) {
+			next = { ...next, warning: catalog.warning };
+		}
+		capabilities = next;
+
+		const savedId = options.restore ? persistedSelection(ctx, key) : selectedId;
+		const piLevel = pi.getThinkingLevel() as ModelThinkingLevel;
+		const option =
+			next.options.find((candidate) => candidate.id === savedId) ??
+			next.options.find((candidate) => candidate.id === piLevel) ??
+			next.options.find((candidate) => candidate.piLevel === piLevel) ??
+			next.options.find((candidate) => candidate.id === next.defaultId) ??
+			next.options[0];
+		if (option) {
+			applyOption(ctx, option, { persist: false, notify: false });
+		} else {
+			selectedId = undefined;
+			updateStatus(ctx);
+		}
+	};
+
+	const showSlider = async (ctx: ExtensionContext): Promise<void> => {
+		if (ctx.mode !== "tui") {
+			appendInfo(details(ctx, "/effort without an argument requires TUI mode."));
+			return;
+		}
+		if (!capabilities || capabilities.options.length === 0) {
+			appendInfo(details(ctx, "No effort levels are available for the active model."));
+			return;
+		}
+
+		const options = capabilities.options;
+		let selectedIndex = Math.max(0, options.findIndex((option) => option.id === selectedId));
+		const result = await ctx.ui.custom<EffortOption | null>((tui, theme, keybindings, done) => {
+			const renderSlider = (width: number): string[] => {
+				const container = new Container();
+				container.addChild(new DynamicBorder((text: string) => theme.fg("accent", text)));
+				container.addChild(new Text(theme.fg("accent", theme.bold("Effort Level")), 1, 0));
+				container.addChild(new Text(theme.fg("muted", capabilities?.modelKey ?? "(no model selected)"), 1, 0));
+				const chunks = options.map((option, index) => {
+					const label = index === selectedIndex ? `[${option.label}]` : ` ${option.label} `;
+					return index === selectedIndex ? theme.fg("accent", theme.bold(label)) : theme.fg("muted", label);
+				});
+				container.addChild(new Text(chunks.join(theme.fg("dim", " ─ ")), 1, 1));
+				container.addChild(new Text(theme.fg("dim", options[selectedIndex]?.description ?? ""), 1, 0));
+				container.addChild(
+					new Text(
+						theme.fg(
+							"dim",
+							`tab/shift+tab or arrows change • ${keyHint("tui.select.confirm", "apply")} • ${keyHint("tui.select.cancel", "cancel")}`,
+						),
+						1,
+						0,
+					),
+				);
+				container.addChild(new Text(theme.fg("dim", `Source: ${sourceLabel(capabilities!)}`), 1, 0));
+				container.addChild(new DynamicBorder((text: string) => theme.fg("accent", text)));
+				return container.render(width).map((line) => truncateToWidth(line, width));
+			};
+
+			return {
+				render: renderSlider,
+				invalidate() {},
+				handleInput(data: string) {
+					if (
+						keybindings.matches(data, "tui.select.down") ||
+						matchesKey(data, Key.right) ||
+						matchesKey(data, Key.tab)
+					) {
+						selectedIndex = (selectedIndex + 1) % options.length;
+						tui.requestRender();
+						return;
+					}
+					if (
+						keybindings.matches(data, "tui.select.up") ||
+						matchesKey(data, Key.left) ||
+						matchesKey(data, Key.shift("tab"))
+					) {
+						selectedIndex = (selectedIndex - 1 + options.length) % options.length;
+						tui.requestRender();
+						return;
+					}
+					if (keybindings.matches(data, "tui.select.confirm")) return done(options[selectedIndex] ?? null);
+					if (keybindings.matches(data, "tui.select.cancel")) done(null);
+				},
+			};
+		});
+
+		if (result) applyOption(ctx, result, { persist: true, notify: true });
+	};
+
+	pi.registerEntryRenderer(INFO_ENTRY, (entry, _options, theme) => {
+		const content = isRecord(entry.data) && typeof entry.data.content === "string" ? entry.data.content : "";
+		return new Text(`${theme.fg("customMessageLabel", "effort")}\n${content}`, 1, 0);
 	});
 
 	pi.registerCommand("effort", {
-		description: "Set effort level (interactive slider or /effort low|high|max)",
+		description: "Use only the active model's effort levels; /effort refresh|status",
 		getArgumentCompletions(prefix: string): AutocompleteItem[] | null {
-			const p = normalize(prefix);
-			const items: AutocompleteItem[] = LEVELS.flatMap((level) =>
-				ALIASES[level].map((alias) => ({
-					value: alias,
-					label: alias,
-					description: `Set effort to ${levelLabel(level)}`,
-				})),
-			).filter((item) => item.value.startsWith(p));
-			return items.length ? items : null;
+			const normalized = normalizeEffort(prefix);
+			const effortItems: AutocompleteItem[] = completionAliases(capabilities?.options ?? []).map(({ value, option }) => ({
+				value,
+				label: value,
+				description: option.description ?? `Set effort to ${option.label}`,
+			}));
+			const commandItems: AutocompleteItem[] = [
+				{ value: "status", label: "status", description: "Show active model effort capabilities" },
+				{ value: "refresh", label: "refresh", description: "Refresh the provider capability catalog" },
+			];
+			const items = [...effortItems, ...commandItems].filter((item) => item.value.startsWith(normalized));
+			return items.length > 0 ? items : null;
 		},
 		handler: async (args, ctx) => {
 			const raw = (args ?? "").trim();
-			if (!raw) {
-				await showEffortSlider(pi, ctx);
+			if (!raw) return showSlider(ctx);
+			const normalized = normalizeEffort(raw);
+			if (normalized === "status") {
+				appendInfo(details(ctx));
+				return;
+			}
+			if (normalized === "refresh") {
+				await synchronizeModel(ctx, { force: true, restore: false });
+				appendInfo(details(ctx, "Effort capabilities refreshed"));
+				ctx.ui.notify("Effort capabilities refreshed", "info");
 				return;
 			}
 
-			const requested = parseEffort(raw);
-			if (!requested) {
-				const reason = `"${raw}" is not an exact supported effort alias.`;
-				sendEffortMessage(pi, effortDetails(ctx, reason));
+			const option = parseEffort(raw, capabilities?.options ?? []);
+			if (!option) {
+				const available = capabilities?.options.map((candidate) => candidate.id).join(", ") || "none";
+				const reason = `"${raw}" is not available for ${capabilities?.modelKey ?? "the active model"}. Available: ${available}.`;
+				appendInfo(details(ctx, reason));
 				ctx.ui.notify(reason, "warning");
 				return;
 			}
-
-			await setEffort(pi, ctx, requested);
+			applyOption(ctx, option, { persist: true, notify: true });
 		},
 	});
 
 	pi.on("session_start", async (_event, ctx) => {
-		updateStatus(ctx, pi.getThinkingLevel() as EffortLevel);
-	});
-
-	pi.on("thinking_level_select", async (event, ctx) => {
-		updateStatus(ctx, event.level as EffortLevel);
+		await synchronizeModel(ctx, { restore: true });
+		initialized = true;
 	});
 
 	pi.on("model_select", async (_event, ctx) => {
-		updateStatus(ctx, pi.getThinkingLevel() as EffortLevel);
+		await synchronizeModel(ctx, { restore: true });
 	});
+
+	pi.on("thinking_level_select", async (event, ctx) => {
+		if (!capabilities || !ctx.model || capabilities.modelKey !== modelKey(ctx.model)) return;
+		if (pendingPiLevel) {
+			if (event.level === pendingPiLevel) {
+				pendingPiLevel = undefined;
+				updateStatus(ctx);
+				return;
+			}
+			pendingPiLevel = undefined;
+		}
+
+		const direct =
+			capabilities.options.find((option) => option.id === event.level) ??
+			capabilities.options.find((option) => option.piLevel === event.level);
+		if (direct) {
+			selectedId = direct.id;
+			if (initialized) recordSelection(direct);
+			updateStatus(ctx);
+			return;
+		}
+
+		const fallback =
+			capabilities.options.find((option) => option.id === capabilities?.defaultId) ?? capabilities.options[0];
+		if (fallback) {
+			applyOption(ctx, fallback, { persist: initialized, notify: false });
+			ctx.ui.notify(`${effortLabel(event.level)} is not provided by this model; using ${fallback.label}.`, "warning");
+		}
+	});
+
 }

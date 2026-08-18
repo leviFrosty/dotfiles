@@ -31,10 +31,19 @@ export PATH="/Users/levi/.codeium/windsurf/bin:$PATH"
 #### -------------------------------------------------
 #### 2. Aliases (from your original config)
 #### -------------------------------------------------
+alias devin="devin --permission-mode dangerous"
 alias code='codium'
 alias oc="opencode"
 alias term="ghostty"
 alias claude-safe="command claude"
+alias claudex="ANTHROPIC_BASE_URL=http://localhost:18765 \
+ANTHROPIC_AUTH_TOKEN=unused \
+ANTHROPIC_MODEL=gpt-5.6-sol[1m] \
+ANTHROPIC_SMALL_FAST_MODEL=gpt-5.6-luna[1m] \
+CLAUDE_CODE_AUTO_COMPACT_WINDOW=272000 \
+CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1 \
+CLAUDE_CODE_DISABLE_NONSTREAMING_FALLBACK=1 \
+  claude"
 alias claude="command claude --dangerously-skip-permissions"
 alias ls='eza --all --icons'
 alias lsl='eza --all --header --git --icons --long --no-permissions'
@@ -42,8 +51,6 @@ alias ..="cd .."
 alias src='source ~/.zshrc'
 alias dotfiles="/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
 alias vim="nvim"
-alias v="vim"
-alias c="code"
 alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 alias note='afplay /System/Library/Sounds/Glass.aiff'
 alias find='fd'
@@ -56,7 +63,6 @@ alias gs="git status"
 alias gl="git log --oneline"
 alias gp="git push"
 alias gpf="git push --force-with-lease"
-alias claude-danger="claude --dangerously-skip-permissions"
 gbl() {
   for branch in $(git branch -r | grep -v HEAD); do
     local date_info=$(git show --format="%cd %cr" --date=format:'%m/%d/%y' "$branch" | head -n 1)
@@ -83,6 +89,9 @@ bindkey '\ef'     forward-word    # Ctrl+Right (VSCodium)
 #### 4. Environment & Editor
 #### -------------------------------------------------
 export EDITOR="nvim"
+
+# Claude Code otherwise downgrades truecolor to ANSI-256 inside tmux.
+export CLAUDE_CODE_TMUX_TRUECOLOR=1
 
 #### -------------------------------------------------
 #### 4. Plugins
@@ -135,3 +144,14 @@ export PATH="$PATH:/Users/levi/.lmstudio/bin"
 
 # sentry
 fpath=("/Users/levi/.local/share/zsh/site-functions" $fpath)
+
+# Tree-scoped .npmrc (a parent-dir .npmrc applies to all subfolders)
+source "$HOME/.config/zsh/npmrc-tree.zsh"
+
+# Android / Java toolchain for Tauri
+export JAVA_HOME="$HOME/.jdks/jdk-21.0.12+8/Contents/Home"
+export ANDROID_HOME="$HOME/Library/Android/sdk"
+export ANDROID_SDK_ROOT="$ANDROID_HOME"
+export NDK_HOME="$ANDROID_HOME/ndk/28.2.13676358"
+export ANDROID_AVD_HOME="$HOME/.android/avd"
+export PATH="$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
