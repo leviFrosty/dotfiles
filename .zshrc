@@ -72,6 +72,30 @@ gbl() {
   done | sort
 }
 alias unsetAWS='unset $(env | grep AWS | grep -v AWS_REGION | grep -v AWS_DEFAULT_REGION | sed '\''s|=.*||'\'')'
+# Music player: focus the dedicated spotatui window, or launch it.
+# --title locks the Ghostty window title to "Spotatui".
+spot() {
+  local win_id
+  win_id=$(aerospace list-windows --all --format '%{window-id}|%{window-title}' \
+    | awk -F'|' '$2 == "Spotatui" {print $1; exit}')
+  if [[ -z $win_id ]]; then
+    open -na Ghostty --args --title=Spotatui --window-save-state=never -e spotatui
+    # AeroSpace reads the title before Ghostty publishes it, so the
+    # on-window-detected rule can miss. Wait for the window and move it here.
+    for _ in {1..50}; do
+      sleep 0.1
+      win_id=$(aerospace list-windows --all --format '%{window-id}|%{window-title}' \
+        | awk -F'|' '$2 == "Spotatui" {print $1; exit}')
+      [[ -n $win_id ]] && break
+    done
+    if [[ -z $win_id ]]; then
+      echo "spotify: Spotatui window did not appear" >&2
+      return 1
+    fi
+    aerospace move-node-to-workspace --window-id "$win_id" music
+  fi
+  aerospace focus --window-id "$win_id"
+}
 
 #### -------------------------------------------------
 #### 3. Key Bindings

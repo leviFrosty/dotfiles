@@ -1,6 +1,21 @@
 # Place a copy of this config to ~/.aerospace.toml
 # After that, you can edit ~/.aerospace.toml to your liking
 
+# See: https://nikitabobko.github.io/AeroSpace/guide#config-version
+config-version = 2
+
+# config-version 2 requires an explicit list of persistent workspaces.
+# These match the workspaces used in the alt-* bindings below.
+persistent-workspaces = [
+    'rest',
+    'browser',
+    'music',
+    'ide',
+    'terminal',
+    'chat',
+    'long-running',
+]
+
 # You can use it to add commands that run after login to macOS user session.
 # 'start-at-login' needs to be 'true' for 'after-login-command' to work
 # Available commands: https://nikitabobko.github.io/AeroSpace/commands
@@ -207,6 +222,13 @@ run = "move-node-to-workspace ide"
 # Music
 [[on-window-detected]]
 if.app-id = 'com.spotify.client'
+run = "move-node-to-workspace music"
+
+# Ghostty window running spotatui (launched via the `spotify` zsh function,
+# which locks the window title to "Spotatui")
+[[on-window-detected]]
+if.app-id = 'com.mitchellh.ghostty'
+if.window-title-regex-substring = '^Spotatui$'
 run = "move-node-to-workspace music"
 
 # Browsers
