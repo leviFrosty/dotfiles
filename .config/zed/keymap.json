@@ -1,0 +1,163 @@
+// Zed keymap
+//
+// For information on binding keys, see the Zed
+// documentation: https://zed.dev/docs/key-bindings
+//
+// To see the default key bindings run `zed: open default keymap`
+// from the command palette.
+[
+  // =============================
+  // ======= LEADER BINDS ========
+  // =============================
+  {
+    "context": "Editor && vim_mode == normal && !menu",
+    "bindings": {
+      "space w": "workspace::Save", // [W]rite (format_on_save handles formatting)
+      "space d": "workspace::SaveWithoutFormat", // Write WITHOUT formatting
+      "space q": "pane::CloseActiveItem", // [Q]uit
+      "space c a": "editor::ToggleCodeActions", // [C]ode [A]ction
+      "space r n": "editor::Rename", // [R]e[n]ame
+      "space g s": "outline::Toggle", // [G]o to [S]ymbol
+      "space g d": "editor::GoToDefinition", // [G]o to [D]efinition
+      "space g r": "editor::FindAllReferences", // [G]o to [R]eferences
+      "space g i": "editor::GoToImplementation", // [G]o to [I]mplementation
+      "[ d": "editor::GoToPreviousDiagnostic", // Prev diagnostics
+      "] d": "editor::GoToDiagnostic", // Next diagnostics
+      "space s": "pane::SplitRight", // [S]plit [S]ide
+      "space v": "pane::SplitDown", // Split [V]ertically (down)
+      "shift-k": "editor::Hover", // vim classic hover
+      "space f m": "editor::Format", // [F]or[m]at
+      "space t": "pane::CloseOtherItems", // Close o[T]her editors
+    },
+  },
+  {
+    // Workspace-scope leader binds (also work when no editor is focused).
+    "context": "vim_mode == normal && !menu",
+    "bindings": {
+      "space g g": "git_panel::ToggleFocus", // [G] [G]it
+      "space f f": "file_finder::Toggle", // [F]ind [F]ile
+      "space f g": "text_finder::Toggle", // [F]ind [G]rep
+      "space e": "project_panel::ToggleFocus", // toggle file explorer
+    },
+  },
+
+  // ================================
+  // ======= PANE MANAGEMENT ========
+  // ================================
+  {
+    "context": "Workspace",
+    "bindings": {
+      "ctrl-h": "workspace::ActivatePaneLeft",
+      "ctrl-l": "workspace::ActivatePaneRight",
+      "ctrl-k": "workspace::ActivatePaneUp",
+      "ctrl-j": "workspace::ActivatePaneDown",
+      "cmd-n": null, // disable new untitled file
+      "ctrl-n": "workspace::ToggleLeftDock",
+      "ctrl-shift-j": "terminal_panel::Toggle",
+    },
+  },
+
+  // ========================
+  // ======= BUFFERS ========
+  // ========================
+  {
+    "context": "Editor && (vim_mode == normal || vim_mode == visual) && !menu",
+    "bindings": {
+      "tab": "pane::ActivateNextItem",
+      "shift-tab": "pane::ActivatePreviousItem",
+      "ctrl-h": "workspace::ActivatePaneLeft",
+      "ctrl-l": "workspace::ActivatePaneRight",
+      "ctrl-k": "workspace::ActivatePaneUp",
+      "ctrl-j": "workspace::ActivatePaneDown",
+      "ctrl-n": "workspace::ToggleLeftDock",
+    },
+  },
+
+  // =========================
+  // ======= VIM OPTS ========
+  // =========================
+  {
+    // visual `p` → `P` (paste without overwriting register).
+    // Zed binds `vim::PasteBefore` for visual P-style paste.
+    "context": "vim_mode == visual",
+    "bindings": {
+      "p": "vim::Paste",
+    },
+  },
+
+  // ==========================
+  // ======= FILE TREE ========
+  // ==========================
+  {
+    "context": "ProjectPanel && not_editing",
+    "bindings": {
+      "r": "project_panel::Rename",
+      "c": "project_panel::Copy",
+      "x": "project_panel::Cut",
+      "p": "project_panel::Paste",
+      "d": "project_panel::Delete",
+      "a": "project_panel::NewFile",
+      "shift-a": "project_panel::NewDirectory",
+      "s": "project_panel::OpenSplitVertical",
+      "enter": "project_panel::Open",
+      "ctrl-n": "workspace::ToggleLeftDock",
+    },
+  },
+
+  // =========================
+  // ======= TERMINAL ========
+  // =========================
+  {
+    "context": "Terminal",
+    "bindings": {
+      "ctrl-shift-l": "pane::ActivateNextItem",
+      "ctrl-shift-h": "pane::ActivatePreviousItem",
+      "ctrl-shift-n": "workspace::NewTerminal",
+      "ctrl-shift-q": "pane::CloseActiveItem",
+    },
+  },
+
+  {
+    "context": "Editor && (showing_code_actions || showing_completions)",
+    "bindings": {
+      "shift-tab": "editor::ContextMenuNext",
+      "ctrl-p": "editor::ContextMenuPrevious",
+      "tab": "editor::ContextMenuNext",
+      "ctrl-n": "editor::ContextMenuNext",
+      "pageup": "editor::ContextMenuFirst",
+      "pagedown": "editor::ContextMenuLast",
+    },
+  },
+  {
+    "context": "Workspace",
+    "bindings": {
+      "cmd-shift-o": "projects::OpenRecent",
+    },
+  },
+  // =========================
+  // ======= OTHER ===========
+  // =========================
+  {
+    "context": "Workspace",
+    "unbind": {
+      "alt-cmd-o": "projects::OpenRecent",
+    },
+  },
+  {
+    "context": "BufferSearchBar",
+    "unbind": {
+      "cmd-shift-o": "outline::Toggle",
+    },
+  },
+  {
+    "context": "Editor && mode == full",
+    "unbind": {
+      "cmd-shift-o": "outline::Toggle",
+    },
+  },
+  {
+    "unbind": {
+      "shift-escape": "workspace::ToggleZoom",
+    },
+  },
+]

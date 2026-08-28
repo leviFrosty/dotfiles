@@ -1,0 +1,185 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+  // =========================
+  // ======= VIM OPTS ========
+  // =========================
+  "colorize_brackets": false,
+  "outline_panel": {
+    "expand_outlines_with_depth": 140
+  },
+  "excerpt_context_lines": 4,
+  "expand_excerpt_lines": 8,
+  "which_key": {
+    "enabled": true
+  },
+  "redact_private_values": false,
+  "close_on_file_delete": true,
+  "show_edit_predictions": false,
+  "audio": {
+    "experimental.input_audio_device": "coreaudio:AppleUSBAudioEngine:Focusrite:Scarlett Solo 4th Gen:S1Z5V4U3C9B731:1,2",
+    "experimental.output_audio_device": "coreaudio:AppleUSBAudioEngine:Focusrite:Scarlett Solo 4th Gen:S1Z5V4U3C9B731:1,2",
+  },
+  "git_panel": {
+    "group_by": "none",
+    "tree_view": true,
+  },
+  "agent": {
+    "default_model": {
+      "provider": "lmstudio",
+      "model": "qwen/qwen3.6-35b-a3b",
+      "enable_thinking": false,
+    },
+    "favorite_models": [],
+    "model_parameters": [],
+  },
+  "diff_view_style": "split",
+  "edit_predictions": {
+    "provider": "zed",
+    "mode": "eager",
+    "allow_data_collection": "no",
+    "open_ai_compatible_api": {
+      "prompt_format": "qwen",
+      "api_url": "http://localhost:1234/v1/completions",
+      "model": "qwen/qwen3.6-35b-a3b",
+      "max_output_tokens": 150,
+    },
+  },
+  "cli_default_open_behavior": "existing_window",
+  "vim_mode": true,
+  "vim": {
+    "use_system_clipboard": "always",
+    "use_smartcase_find": true,
+    "toggle_relative_line_numbers": true,
+    "highlight_on_yank_duration": 200,
+  },
+  "base_keymap": "VSCode",
+
+  // ==========================
+  // ======= LANG OPTS ========
+  // ==========================
+  "languages": {
+    "JavaScript": { "formatter": "prettier" },
+    "TypeScript": { "formatter": "language_server" },
+    "TSX": { "formatter": "prettier" },
+    "JSX": { "formatter": "prettier" },
+    "JSON": { "formatter": "prettier" },
+    "JSONC": { "formatter": "prettier" },
+    "CSS": { "formatter": "prettier" },
+    "Markdown": { "format_on_save": "off" },
+    "Go": { "formatter": "language_server" },
+    "Vue.js": { "formatter": "language_server" },
+    "Terraform": { "formatter": "language_server" },
+  },
+
+  // ======================
+  // ======= THEME ========
+  // ======================
+  "theme": {
+    "mode": "dark",
+    "light": "One Light",
+    "dark": "One Dark Pro",
+  },
+  "icon_theme": {
+    "mode": "dark",
+    "light": "Zed (Default)",
+    "dark": "Material Icon Theme",
+  },
+  "ui_font_size": 16,
+  "buffer_font_size": 20.0,
+  "buffer_font_family": "JetBrainsMono Nerd Font Mono",
+  "buffer_font_fallbacks": ["Fira Code", "Courier New", "monospace"],
+  "buffer_font_features": { "calt": true, "liga": true },
+  "buffer_line_height": { "custom": 1.22 },
+  "cursor_blink": false,
+  "minimap": { "show": "never" },
+  "tab_bar": { "show": true },
+  "breadcrumbs": { "show_symbols": false },
+
+  // Mirrors VSCode italic textMate rules for comments/keywords/storage etc.
+  "experimental.theme_overrides": {
+    "syntax": {
+      "comment": { "font_style": "Italic" },
+      "comment.doc": { "font_style": "Italic" },
+      "keyword": { "font_style": "Italic" },
+      "storage": { "font_style": "Italic" },
+      "type": { "font_style": "Italic" },
+      "variable.special": { "font_style": "Italic" },
+      "attribute": { "font_style": "Italic" },
+    },
+  },
+
+  // ================================
+  // ======= EDITOR BEHAVIOR ========
+  // ================================
+  "linked_edits": true,
+  "autosave": "on_window_change",
+  "format_on_save": "on",
+  "restore_on_startup": "last_session",
+  "session": { "trust_all_worktrees": true },
+  "telemetry": { "diagnostics": false, "metrics": false },
+
+  // ==========================
+  // ======= FILE TREE ========
+  // ==========================
+  "project_panel": {
+    "dock": "left",
+    "auto_reveal_entries": false,
+  },
+
+  // =========================
+  // ======= TERMINAL ========
+  // =========================
+  "terminal": {
+    "env": {
+      "TERM": "xterm-256color",
+      "COLORTERM": "truecolor",
+    },
+    "font_size": 15.0,
+    "max_scroll_history_lines": 10000,
+  },
+
+  // ====================
+  // ======= GIT ========
+  // ====================
+  "git": {
+    "inline_blame": { "enabled": false },
+  },
+
+  // ======================
+  // ======= AGENT ========
+  // ======================
+  "agent_servers": {
+    "devin": {
+      "default_config_options": {
+        "model": "glm-5-2",
+      },
+      "type": "registry",
+    },
+    "claude-acp": {
+      "default_config_options": {
+        "mode": "bypassPermissions",
+      },
+      "type": "registry",
+    },
+  },
+  "auto_update_extensions": {
+    // I've only disabled third-party extensions auto-updates, first-party extensions
+    // I figured: if Zed is compromised themselves, I've been PWNED anyway, https://github.com/zed-extensions/
+    "git-firefly": false,
+    "scss": false,
+    "one-dark-pro": false,
+    "codebook": false,
+    "catppuccin": false,
+    "lua": false,
+    "xml": false,
+    "graphql": false,
+  },
+  "file_scan_exclusions": [".claude/worktrees"],
+}
