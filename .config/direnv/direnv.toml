@@ -1,0 +1,3 @@
+# Keep routine logs from interrupting Powerlevel10k instant prompt.
+[global]
+log_filter = "^$"
