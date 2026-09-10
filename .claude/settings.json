@@ -10,7 +10,6 @@
       "PushNotification",
       "RemoteTrigger",
       "ReportFindings",
-      "ScheduleWakup",
       "AskUserQuestion",
       "CronDelete",
       "CronList",
