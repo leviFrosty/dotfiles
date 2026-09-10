@@ -18,21 +18,9 @@
       "TaskOutput"
     ]
   },
-  "model": "claude-fable-5[1m]",
+  "model": "claude-fable-5-1[1m]",
   "disableClaudeAiConnectors": true,
   "disableBundledSkills": true,
-  "hooks": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "osascript -e 'tell application \"System Events\" to set frontApp to name of first application process whose frontmost is true' -e 'if frontApp is not in {\"Terminal\", \"iTerm2\", \"kitty\", \"Alacritty\", \"Ghostty\", \"wezterm-gui\", \"WezTerm\", \"Hyper\", \"Warp\", \"Rio\", \"Claude\"} then' -e 'display notification \"Claude Code response complete\" with title \"Claude Code\"' -e 'end if'"
-          }
-        ]
-      }
-    ]
-  },
   "disableRemoteControl": true,
   "disableWorkflows": true,
   "disableArtifact": true,
@@ -45,6 +33,17 @@
     "rust-analyzer-lsp@claude-plugins-official": true
   },
   "effortLevel": "high",
+  "modelSettings": {
+    "claude-opus-5": {
+      "effortLevel": "medium"
+    },
+    "claude-fable-5": {
+      "effortLevel": "xhigh"
+    },
+    "claude-fable-5-1": {
+      "effortLevel": "medium"
+    }
+  },
   "tui": "fullscreen",
   "voice": {
     "enabled": true,

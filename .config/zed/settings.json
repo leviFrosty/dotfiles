@@ -12,12 +12,12 @@
   // =========================
   "colorize_brackets": false,
   "outline_panel": {
-    "expand_outlines_with_depth": 140
+    "expand_outlines_with_depth": 140,
   },
   "excerpt_context_lines": 4,
   "expand_excerpt_lines": 8,
   "which_key": {
-    "enabled": true
+    "enabled": true,
   },
   "redact_private_values": false,
   "close_on_file_delete": true,
@@ -46,8 +46,8 @@
     "allow_data_collection": "no",
     "open_ai_compatible_api": {
       "prompt_format": "qwen",
-      "api_url": "http://localhost:1234/v1/completions",
-      "model": "qwen/qwen3.6-35b-a3b",
+      "api_url": "",
+      "model": "",
       "max_output_tokens": 150,
     },
   },
@@ -149,7 +149,7 @@
   // ======= GIT ========
   // ====================
   "git": {
-    "inline_blame": { "enabled": false },
+    "inline_blame": { "enabled": true },
   },
 
   // ======================

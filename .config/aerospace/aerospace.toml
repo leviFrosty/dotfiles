@@ -14,6 +14,9 @@ persistent-workspaces = [
     'terminal',
     'chat',
     'long-running',
+    'agenda',
+    'orchestrator',
+    'notes'
 ]
 
 # You can use it to add commands that run after login to macOS user session.
@@ -143,6 +146,9 @@ automatically-unhide-macos-hidden-apps = true
     alt-t = 'workspace terminal'
     alt-c = 'workspace chat'
     alt-z = 'workspace long-running'
+    alt-a = 'workspace agenda'
+    alt-o = 'workspace orchestrator'
+    alt-n = 'workspace notes'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
     alt-shift-r = 'move-node-to-workspace rest'
@@ -152,6 +158,9 @@ automatically-unhide-macos-hidden-apps = true
     alt-shift-t = 'move-node-to-workspace terminal'
     alt-shift-c = 'move-node-to-workspace chat'
     alt-shift-z = 'move-node-to-workspace long-running'
+    alt-shift-a = 'move-node-to-workspace agenda'
+    alt-shift-o = 'move-node-to-workspace orchestrator'
+    alt-shift-n = 'move-node-to-workspace notes'
 
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#workspace-back-and-forth
@@ -272,4 +281,16 @@ run = 'layout tiling'
 [[on-window-detected]]
 if.app-id = 'cc.ffitch.shottr'
 run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.todoist.mac.Todoist'
+run = "move-node-to-workspace agenda"
+
+[[on-window-detected]]
+if.app-id = 'com.t3tools.t3code'
+run = "move-node-to-workspace orchestrator"
+
+[[on-window-detected]]
+if.app-id = 'md.obsidian'
+run = "move-node-to-workspace notes"
 

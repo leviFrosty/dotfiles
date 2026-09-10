@@ -180,6 +180,13 @@ export NDK_HOME="$ANDROID_HOME/ndk/28.2.13676358"
 export ANDROID_AVD_HOME="$HOME/.android/avd"
 export PATH="$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
 
+# tabtab source for packages
+# uninstall by removing these lines
+[[ -f ~/.config/tabtab/zsh/__tabtab.zsh ]] && . ~/.config/tabtab/zsh/__tabtab.zsh || true
+
+# Vite+ bin (https://viteplus.dev)
+. "$HOME/.config/vite-plus/env"
+
 # Switch Claude profiles automatically by directory.
 if command -v direnv >/dev/null 2>&1; then
   eval "$(direnv hook zsh)"
