@@ -39,3 +39,7 @@ macos-titlebar-style = hidden
 
 background-opacity = 0.95
 background-blur = 10
+
+# SSH: teach remote hosts about xterm-ghostty, and fall back to xterm-256color
+# on hosts where the terminfo can't be installed.
+shell-integration-features = cursor,no-sudo,title,path,ssh-env,ssh-terminfo

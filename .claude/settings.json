@@ -17,7 +17,7 @@
       "TaskOutput"
     ]
   },
-  "model": "claude-fable-5-1[1m]",
+  "model": "opus[1m]",
   "disableClaudeAiConnectors": true,
   "disableBundledSkills": true,
   "disableRemoteControl": true,
@@ -29,7 +29,9 @@
   },
   "enabledPlugins": {
     "chrome-devtools-mcp@claude-plugins-official": false,
-    "rust-analyzer-lsp@claude-plugins-official": true
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "posthog@claude-plugins-official": false,
+    "telemetry@builtin": false
   },
   "effortLevel": "high",
   "modelSettings": {
@@ -40,6 +42,9 @@
       "effortLevel": "xhigh"
     },
     "claude-fable-5-1": {
+      "effortLevel": "medium"
+    },
+    "claude-opus-5-5": {
       "effortLevel": "medium"
     }
   },
