@@ -191,3 +191,17 @@ export PATH="$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:
 if command -v direnv >/dev/null 2>&1; then
   eval "$(direnv hook zsh)"
 fi
+
+# Switch to a branch, or cd into the worktree that already has it checked out
+gsw() {
+  local wt
+  wt=$(git worktree list --porcelain | awk -v b="refs/heads/$1" '
+    /^worktree / { path = substr($0, 10) }
+    $0 == "branch " b { print path; exit }')
+  if [[ -n "$wt" ]]; then
+    cd "$wt" && echo "→ $wt"
+  else
+    git switch "$@"
+  fi
+}
+(( $+functions[compdef] )) && compdef _git gsw=git-switch
